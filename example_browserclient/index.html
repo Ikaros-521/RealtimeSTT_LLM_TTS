@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Streamer</title>
+    <meta charset="UTF-8">
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .text-display {
+            white-space: pre-wrap; /* Preserves spaces and line breaks */
+            font-size: 16px;
+        }
+        .yellow {
+            color: yellow;
+        }
+        .cyan {
+            color: cyan;
+        }
+    </style>
+</head>
+<body>
+    <div id="textDisplay" style="max-width: 800px; margin: auto;">
+    <script src="client.js"></script>
+</body>
+</html>

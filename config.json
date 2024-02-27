@@ -1,0 +1,302 @@
+{
+  "run_py": "realtime_stt_llm_tts",
+  "recorder": {
+    "device_index": 0,
+    "start_cmd": [
+      "助手你好",
+      "你好"
+    ],
+    "stop_cmd": [
+      "请回答",
+      "請回答",
+      "帮我查一下",
+      "講解一下",
+      "讲解一下"
+    ],
+    "drop_cmd": [
+      "清空录音",
+      "清空錄音",
+      "放弃錄音",
+      "放弃录音",
+      "取消錄音",
+      "取消录音"
+    ],
+    "get_mouse_coordinate_cmd": [
+      "鼠标坐标"
+    ]
+  },
+  "audiopen": {
+    "start_x": 1277,
+    "start_y": 1296,
+    "stop_x": 1277,
+    "stop_y": 1296
+  },
+  "play_audio": {
+    "enable": true,
+    "text_split_enable": true,
+    "normal_interval": 0.5,
+    "out_path": "out",
+    "player": "pygame"
+  },
+  "audio_player": {
+    "api_ip_port": "http://127.0.0.1:5600"
+  },
+  "filter": {
+    "max_len": 9999,
+    "max_char_len": 9999
+  },
+  "openai": {
+    "api": "https://api.openai.com/v1",
+    "api_key": [
+      "sk-"
+    ],
+    "model": "gpt-3.5-turbo"
+  },
+  "chatgpt": {
+    "model": "gpt-3.5-turbo",
+    "temperature": 0.9,
+    "max_tokens": 4096,
+    "top_p": 1.0,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0,
+    "preset": "你是一个人工智能助手",
+    "prompt_template": "当前中国北京日期：{current_date}，根据以下数据进行总结并提供答案。如果问题与数据不相关，使用你的常规知识回答，不可以胡编乱造！。\n参考数据：{summary_content}\n问题：{recorder_content}"
+  },
+  "audio_synthesis_type": "gpt_sovits",
+  "audio_random_speed": {
+    "normal": {
+      "enable": false,
+      "speed_min": 0.8,
+      "speed_max": 1.2
+    },
+    "copywriting": {
+      "enable": false,
+      "speed_min": 0.8,
+      "speed_max": 1.2
+    }
+  },
+  "vits": {
+    "type": "bert_vits2",
+    "config_path": "E:\\vits-simple-api\\Model\\ikaros\\config.json",
+    "api_ip_port": "http://127.0.0.1:23456",
+    "id": "0",
+    "lang": "自动",
+    "length": "1",
+    "noise": "0.33",
+    "noisew": "0.4",
+    "max": "50",
+    "format": "wav",
+    "sdp_radio": "0.2"
+  },
+  "bert_vits2": {
+    "type": "hiyori",
+    "api_ip_port": "http://127.0.0.1:5000",
+    "model_id": 0,
+    "speaker_name": "ikaros",
+    "speaker_id": 0,
+    "language": "auto",
+    "length": 1.0,
+    "noise": 0.2,
+    "noisew": 0.9,
+    "sdp_radio": 0.2,
+    "auto_translate": false,
+    "auto_split": false,
+    "emotion": "",
+    "style_text": null,
+    "style_weight": 0.7
+  },
+  "vits_fast": {
+    "config_path": "D:\\GitHub_pro\\VITS-fast-fine-tuning\\inference\\finetune_speaker.json",
+    "api_ip_port": "http://127.0.0.1:7860",
+    "character": "ikaros",
+    "language": "自动识别",
+    "speed": 1.0
+  },
+  "ddsp_svc": {
+    "enable": false,
+    "config_path": "E:\\DDSP-SVC-3.0\\exp\\combsub-test\\config.yaml",
+    "api_ip_port": "http://127.0.0.1:6844",
+    "fSafePrefixPadLength": 0.0,
+    "fPitchChange": 0.0,
+    "sSpeakId": 0,
+    "sampleRate": 44100
+  },
+  "so_vits_svc": {
+    "enable": false,
+    "config_path": "E:\\so-vits-svc\\configs\\ikaros_v1.json",
+    "api_ip_port": "http://127.0.0.1:1145",
+    "spk": "ikaros",
+    "tran": 1.0,
+    "wav_format": "wav"
+  },
+  "edge-tts": {
+    "voice": "zh-CN-XiaoyiNeural",
+    "rate": "+0%",
+    "volume": "+0%"
+  },
+  "elevenlabs": {
+    "api_key": "",
+    "voice": "Rachel",
+    "model": "eleven_monolingual_v1"
+  },
+  "genshinvoice_top": {
+    "speaker": "神里绫华_ZH",
+    "format": "wav",
+    "length": "1.25",
+    "noise": "0.2",
+    "noisew": "0.9",
+    "language": "ZH"
+  },
+  "tts_ai_lab_top": {
+    "appid": "9tuof1o8y7ni8h3e",
+    "token": "2b0f041d3e872894c2c1aaaf86567e9f",
+    "speaker": "白露",
+    "sdp_ratio": "0.2",
+    "noise": "0.5",
+    "noisew": "0.9",
+    "length": "1.0"
+  },
+  "bark_gui": {
+    "api_ip_port": "http://127.0.0.1:7860",
+    "spk": "zh_speaker_0",
+    "generation_temperature": 0.6,
+    "waveform_temperature": 0.7,
+    "end_of_sentence_probability": 0.05,
+    "quick_generation": true,
+    "seed": -1.0,
+    "batch_count": 1
+  },
+  "vall_e_x": {
+    "api_ip_port": "http://127.0.0.1:7860",
+    "language": "auto-detect",
+    "accent": "no-accent",
+    "voice_preset": "ikaros",
+    "voice_preset_file_path": "D:\\GitHub_pro\\AI-Vtuber\\tests\\test_VALL-E-X\\ikaros.npz"
+  },
+  "openai_tts": {
+    "type": "api",
+    "api_ip_port": "https://api.openai.com/v1",
+    "model": "tts-1",
+    "voice": "onyx",
+    "api_key": "sk-"
+  },
+  "reecho_ai": {
+    "Authorization": "sk-xxx",
+    "model": "reecho-neural-voice-001",
+    "randomness": 97,
+    "stability_boost": 40,
+    "voiceId": "b4b885c3-89a7-46d4-badb-015a55bb3a91"
+  },
+  "gradio_tts": {
+    "request_parameters": "{{\"url\": \"https://xzjosh-nana7mi-bert-vits2.hf.space/--replicas/b9be4/\", \"fn_index\": 0, \"data_analysis\": 1, \"text_input\": \"{content}\", \"speaker_option\": \"Nana7mi\", \"sdp_ratio\": 0.5, \"noise\": 0.6, \"noise_w\": 0.9, \"length\": 1}}"
+  },
+  "gpt_sovits": {
+    "type": "webtts",
+    "ws_ip_port": "ws://localhost:9872/queue/join",
+    "api_ip_port": "http://127.0.0.1:9880",
+    "ref_audio_path": "F:\\GPT-SoVITS\\raws\\ikaros\\21.wav",
+    "prompt_text": "マスター、どうりょくろか、いいえ、なんでもありません",
+    "prompt_language": "日文",
+    "language": "zh",
+    "cut": "凑四句一切",
+    "webtts": {
+      "api_ip_port": "http://127.0.0.1:8080",
+      "spk": "sanyueqi",
+      "lang": "zh",
+      "speed": "1.0",
+      "emotion": "正常"
+    }
+  },
+  "clone_voice": {
+    "type": "tts",
+    "api_ip_port": "http://127.0.0.1:9988",
+    "voice": "E:\\GitHub_pro\\新音源\\天降之物数据集\\ikaros\\644.wav",
+    "language": "zh-cn",
+    "speed": 1.2
+  },
+  "talk": {
+    "key_listener_enable": true,
+    "device_index": "1",
+    "no_recording_during_playback": true,
+    "no_recording_during_playback_sleep_interval": 1.0,
+    "username": "主人",
+    "type": "faster_whisper",
+    "continuous_talk": false,
+    "trigger_key": "`",
+    "stop_trigger_key": "/",
+    "volume_threshold": 800.0,
+    "silence_threshold": 15.0,
+    "CHANNELS": 1,
+    "RATE": 16000,
+    "baidu": {
+      "app_id": "",
+      "api_key": "",
+      "secret_key": ""
+    },
+    "google": {
+      "tgt_lang": "zh-CN"
+    },
+    "faster_whisper": {
+      "model_size": "./models/models--Systran--faster-whisper-large-v3/snapshots/edaa852ec7e145841d8ffdb056a99866b5f0a478",
+      "device": "cuda",
+      "compute_type": "float16",
+      "download_root": "./models",
+      "beam_size": 5
+    }
+  },
+  "webui": {
+    "ip": "127.0.0.1",
+    "port": 8089,
+    "title": "实时语音对话",
+    "auto_run": false,
+    "theme": {
+      "choose": "默认黑白",
+      "list": {
+        "蓝粉渐变": {
+          "login_card": "width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;position: fixed;left: 0;top: 0;background: linear-gradient(45deg, #3494E6, #EC6EAD);",
+          "tab_panel": "background: linear-gradient(45deg, #3494E6, #EC6EAD);",
+          "card": "margin:10px 0px;background: linear-gradient(45deg, #3494E6, #EC6EAD);",
+          "button_bottom": "margin:5px",
+          "button_bottom_color": "#EC6EAD",
+          "button_internal": "margin:5px",
+          "button_internal_color": "",
+          "switch_internal": "",
+          "echart": "width:100%; height:600px;"
+        },
+        "默认黑白": {
+          "login_card": "width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;position: fixed;left: 0;top: 0;",
+          "tab_panel": "",
+          "card": "margin:10px 0px;",
+          "button_bottom": "margin:5px",
+          "button_bottom_color": "primary",
+          "button_internal": "margin:5px",
+          "button_internal_color": "",
+          "switch_internal": "",
+          "echart": "width:100%; height:600px;"
+        },
+        "极地极光": {
+          "login_card": "background:linear-gradient(45deg, #027333, #025959);width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;position: fixed;left: 0;top: 0;",
+          "tab_panel": "background: linear-gradient(45deg, #027333, #025959);",
+          "card": "margin:10px 0px;background: linear-gradient(45deg, #027333, #04D939);",
+          "button_bottom": "margin:5px",
+          "button_bottom_color": "#04D939;",
+          "button_internal": "margin:5px",
+          "button_internal_color": "",
+          "switch_internal": "",
+          "echart": "width:100%; height:600px;"
+        },
+        "曲奇饼干": {
+          "login_card": "background:linear-gradient(45deg, #F2BC8D, #73341D);width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;position: fixed;left: 0;top: 0;",
+          "tab_panel": "background: linear-gradient(45deg, #F2BC8D, #73341D);",
+          "card": "margin:10px 0px;background: linear-gradient(45deg, #F2BC8D, #73341D);",
+          "button_bottom": "margin:5px;",
+          "button_bottom_color": "#A65F37",
+          "button_internal": "margin:5px",
+          "button_internal_color": "",
+          "switch_internal": "",
+          "echart": "width:100%; height:600px;"
+        }
+      }
+    }
+  }
+}
