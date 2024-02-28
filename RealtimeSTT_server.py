@@ -5,7 +5,7 @@ import threading
 import numpy as np
 from scipy.signal import resample
 import json
-import sys, os, logging, traceback
+import sys, os, logging, traceback, base64
 import requests
 from zhipuai import ZhipuAI
 
@@ -138,7 +138,11 @@ def llm_and_tts(prompt):
                 },
                 "speed": 1
             }
-            audio_player.play(data_json)
+            # audio_player.play(data_json)
+
+            asyncio.new_event_loop().run_until_complete(
+                send_audio_to_client(voice_tmp_path)
+            )
 
             # 清空
             tmp_content = ""
@@ -146,7 +150,7 @@ def llm_and_tts(prompt):
         # my_logger.info(chunk)
         if chunk.choices[0].finish_reason == "stop":
             my_logger.info("任务完成")
-            return
+            return None
         
 if __name__ == '__main__':
     common = Common()
@@ -222,10 +226,30 @@ if __name__ == '__main__':
     recorder = None
     recorder_ready = threading.Event()
     client_websocket = None
+    audio_client_websocket = None
 
     async def send_to_client(message):
         if client_websocket:
             await client_websocket.send(message)
+
+    async def send_audio_to_client(audio_file_path):
+        # 从文件扩展名中提取音频格式
+        _, audio_extension = os.path.splitext(audio_file_path)
+        audio_format = audio_extension.lstrip('.')  # 移除点，获取格式如"mp3"
+
+        # 读取音频文件内容
+        with open(audio_file_path, 'rb') as audio_file:
+            audio_data = audio_file.read()
+
+        # 将音频数据编码为Base64字符串
+        audio_data_base64 = base64.b64encode(audio_data).decode('utf-8')
+
+        # 创建包含音频数据和格式的消息
+        message = json.dumps({'type': 'audio', 'audioData': audio_data_base64, 'format': audio_format})
+
+        # 通过WebSocket发送消息
+        if audio_client_websocket:
+            await audio_client_websocket.send(message)
 
     def text_detected(text):
         asyncio.new_event_loop().run_until_complete(
@@ -375,8 +399,8 @@ if __name__ == '__main__':
 
         return resampled_audio.astype(np.int16).tobytes()
 
-    async def echo(websocket, path):
-        print("Client connected")
+    async def text_handler(websocket, path):
+        print("text_handler Client connected")
         global client_websocket
         client_websocket = websocket
         async for message in websocket:
@@ -393,12 +417,22 @@ if __name__ == '__main__':
             resampled_chunk = decode_and_resample(chunk, sample_rate, 16000)
             recorder.feed_audio(resampled_chunk)
 
-    start_server = websockets.serve(echo, "localhost", 9001)
+    async def audio_handler(websocket, path):
+        print("audio_handler Client connected")
+        global audio_client_websocket
+        audio_client_websocket = websocket
+        async for message in websocket:
+
+            print(message)
+
+    start_text_server = websockets.serve(text_handler, "localhost", 9001)
+    start_audio_server = websockets.serve(audio_handler, "localhost", 9002)
 
     recorder_thread = threading.Thread(target=recorder_thread)
     recorder_thread.start()
     recorder_ready.wait()
 
     print("Server started. Press Ctrl+C to stop the server.")
-    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_until_complete(start_text_server)
+    asyncio.get_event_loop().run_until_complete(start_audio_server)
     asyncio.get_event_loop().run_forever()

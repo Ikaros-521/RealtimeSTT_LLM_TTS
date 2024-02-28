@@ -1,4 +1,5 @@
-let socket = new WebSocket("ws://localhost:9001");
+let textSocket = new WebSocket("ws://localhost:9001");
+let audioSocket = new WebSocket("ws://localhost:9002");
 let displayDiv = document.getElementById('textDisplay');
 let server_available = false;
 let mic_available = false;
@@ -7,14 +8,14 @@ let fullSentences = [];
 const serverCheckInterval = 5000; // Check every 5 seconds
 
 function connectToServer() {
-    socket = new WebSocket("ws://localhost:9001");
+    textSocket = new WebSocket("ws://localhost:9001");
 
-    socket.onopen = function(event) {
+    textSocket.onopen = function(event) {
         server_available = true;
         start_msg();
     };
 
-    socket.onmessage = function(event) {
+    textSocket.onmessage = function(event) {
         let data = JSON.parse(event.data);
 
         if (data.type === 'realtime') {
@@ -25,12 +26,12 @@ function connectToServer() {
         }
     };
 
-    socket.onclose = function(event) {
+    textSocket.onclose = function(event) {
         server_available = false;
     };
 }
 
-socket.onmessage = function(event) {
+textSocket.onmessage = function(event) {
     let data = JSON.parse(event.data);
 
     if (data.type === 'realtime') {
@@ -70,7 +71,7 @@ setInterval(() => {
 
 start_msg()
 
-socket.onopen = function(event) {
+textSocket.onopen = function(event) {
     server_available = true;
     start_msg()
 };
@@ -98,7 +99,7 @@ navigator.mediaDevices.getUserMedia({ audio: true })
 
         // Send the 16-bit PCM data to the server
 
-        if (socket.readyState === WebSocket.OPEN) {
+        if (textSocket.readyState === WebSocket.OPEN) {
             // Create a JSON string with metadata
             let metadata = JSON.stringify({ sampleRate: audioContext.sampleRate });
             // Convert metadata to a byte array
@@ -110,8 +111,78 @@ navigator.mediaDevices.getUserMedia({ audio: true })
             metadataLengthView.setInt32(0, metadataBytes.byteLength, true); // true for little-endian
             // Combine metadata length, metadata, and audio data into a single message
             let combinedData = new Blob([metadataLength, metadataBytes, outputData.buffer]);
-            socket.send(combinedData);
+            textSocket.send(combinedData);
         }
     };
 })
 .catch(e => console.error(e));
+
+
+
+let audioQueue = []; // 音频播放队列
+let isPlaying = false; // 标记当前是否有音频正在播放
+
+function base64ToBlob(base64, mimeType) {
+    const byteCharacters = atob(base64);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+        const slice = byteCharacters.slice(offset, offset + 1024);
+        const byteNumbers = new Array(slice.length);
+
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, {type: mimeType});
+    return blob;
+}
+
+
+// 当接收到音频数据时的处理函数
+function onAudioReceived(audioData, audioFormat) {
+    // 将Base64编码的字符串解码为二进制数据
+    let audioBlob = base64ToBlob(audioData, `audio/${audioFormat}`); // 使用动态音频格式
+    let audioUrl = URL.createObjectURL(audioBlob); // 创建Blob URL
+
+    audioQueue.push(audioUrl); // 将Blob URL添加到播放队列
+    playNextAudio(); // 尝试播放下一个音频
+}
+
+// 播放队列中的下一个音频
+function playNextAudio() {
+    if (!isPlaying && audioQueue.length > 0) {
+        isPlaying = true; // 标记为正在播放
+        let audioData = audioQueue.shift(); // 从队列中取出第一个音频数据
+        let audio = new Audio(audioData); // 创建一个新的Audio对象来播放音频
+        audio.play(); // 开始播放
+
+        // 当音频播放完成时
+        audio.onended = function() {
+            isPlaying = false; // 标记为播放完成
+            playNextAudio(); // 尝试播放队列中的下一个音频
+        };
+    }
+}
+
+// 修改audioSocket.onmessage处理函数，以处理接收到的音频数据
+audioSocket.onmessage = function(event) {
+    let data = JSON.parse(event.data);
+
+    if (data.type === 'audio') {
+        onAudioReceived(data.audioData, data.format); // 使用音频数据和格式
+    }
+
+    // if (data.type === 'realtime') {
+    //     displayRealtimeText(data.text, displayDiv);
+    // } else if (data.type === 'fullSentence') {
+    //     fullSentences.push(data.text);
+    //     displayRealtimeText("", displayDiv); // 刷新显示以显示新的完整句子
+    // } else if (data.type === 'audio') {
+    //     onAudioReceived(data.audioUrl); // 处理接收到的音频数据
+    // }
+};
