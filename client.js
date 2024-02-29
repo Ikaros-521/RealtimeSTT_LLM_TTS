@@ -1,46 +1,157 @@
-let textSocket = new WebSocket("ws://localhost:9001");
-let audioSocket = new WebSocket("ws://localhost:9002");
+// let textSocket = new WebSocket("ws://localhost:9001");
+// let audioSocket = new WebSocket("ws://localhost:9002");
+let textSocket = null;
+let audioSocket = null;
 let displayDiv = document.getElementById('textDisplay');
 let server_available = false;
 let mic_available = false;
 let fullSentences = [];
+// 聊天中的标志位
+let is_talking = false;
 
 const serverCheckInterval = 5000; // Check every 5 seconds
 
-function connectToServer() {
-    textSocket = new WebSocket("ws://localhost:9001");
+function connectToTextServer() {
+    try {
+        textSocket = new WebSocket("ws://localhost:9001");
 
-    textSocket.onopen = function(event) {
-        server_available = true;
-        start_msg();
-    };
+        textSocket.onopen = function(event) {
+            server_available = true;
+            start_msg();
+        };
 
-    textSocket.onmessage = function(event) {
-        let data = JSON.parse(event.data);
+        textSocket.onmessage = function(event) {
+            let data = JSON.parse(event.data);
+        
+            if (data.type === 'realtime') {
+                displayRealtimeText(data.text, displayDiv);
+            } else if (data.type === 'fullSentence') {
+                fullSentences.push(data.text);
+                displayRealtimeText("", displayDiv); // Refresh display with new full sentence
+            }
+        };
 
-        if (data.type === 'realtime') {
-            displayRealtimeText(data.text, displayDiv);
-        } else if (data.type === 'fullSentence') {
-            fullSentences.push(data.text);
-            displayRealtimeText("", displayDiv); // Refresh display with new full sentence
-        }
-    };
+        audioSocket.onerror = function(event) {
+            // 处理连接错误
+            console.error("Text WebSocket connection error.");
+        };
 
-    textSocket.onclose = function(event) {
-        server_available = false;
-    };
+        textSocket.onclose = function(event) {
+            server_available = false;
+        };
+
+        return true;
+    } catch (error) {
+        console.error('Error connecting to text server:', error);
+
+        return false;
+    }
 }
 
-textSocket.onmessage = function(event) {
-    let data = JSON.parse(event.data);
+// 连接到音频服务器
+function connectToAudioServer() {
+    try {
+        audioSocket = new WebSocket("ws://localhost:9002");
 
-    if (data.type === 'realtime') {
-        displayRealtimeText(data.text, displayDiv);
-    } else if (data.type === 'fullSentence') {
-        fullSentences.push(data.text);
-        displayRealtimeText("", displayDiv); // Refresh display with new full sentence
+        audioSocket.onopen = function(event) {
+            // 处理连接打开
+        };
+
+        // 修改audioSocket.onmessage处理函数，以处理接收到的音频数据
+        audioSocket.onmessage = function(event) {
+            let data = JSON.parse(event.data);
+
+            if (data.type === 'audio') {
+                onAudioReceived(data.audioData, data.format); // 使用音频数据和格式
+            }
+
+            // if (data.type === 'realtime') {
+            //     displayRealtimeText(data.text, displayDiv);
+            // } else if (data.type === 'fullSentence') {
+            //     fullSentences.push(data.text);
+            //     displayRealtimeText("", displayDiv); // 刷新显示以显示新的完整句子
+            // } else if (data.type === 'audio') {
+            //     onAudioReceived(data.audioUrl); // 处理接收到的音频数据
+            // }
+        };
+
+        audioSocket.onclose = function(event) {
+            // 处理连接关闭
+        };
+
+        audioSocket.onerror = function(event) {
+            // 处理连接错误
+            console.error("Audio WebSocket connection error.");
+        };
+
+        return true;
+    } catch (error) {
+        console.error('Error connecting to audio server:', error);
+        return false;
     }
-};
+}
+
+// 通用函数来控制socket的开关
+function toggleSocketConnection(socketType, action) {
+    try {
+        if (socketType === 'text') {
+            if (textSocket != null) {
+                if (action === 'open' && textSocket.readyState !== WebSocket.OPEN) {
+                    return connectToTextServer(); // 调用已有的连接函数
+                } else if (action === 'close' && textSocket.readyState === WebSocket.OPEN) {
+                    textSocket.close(); // 关闭socket连接
+                }
+            } else {
+                if (action === 'open') {
+                    return connectToTextServer(); // 连接到音频服务器
+                } else if (action === 'close') {
+                    // textSocket.close(); // 关闭socket连接
+                }
+            }
+            
+        } else if (socketType === 'audio') {
+            if (audioSocket != null) {
+                if (action === 'open' && (!audioSocket || audioSocket.readyState !== WebSocket.OPEN)) {
+                    return connectToAudioServer(); // 连接到音频服务器
+                } else if (action === 'close' && audioSocket && audioSocket.readyState === WebSocket.OPEN) {
+                    audioSocket.close(); // 关闭socket连接
+                }
+            } else {
+                if (action === 'open') {
+                    return connectToAudioServer(); // 连接到音频服务器
+                } else if (action === 'close') {
+                    // audioSocket.close(); // 关闭socket连接
+                }
+            }
+        }   
+
+        return true;
+    } catch (error) {
+        console.error('Error toggling socket connection:', error);
+        return false;
+    }
+    
+}
+
+function start_talk() {
+    if (is_talking) {
+        if (toggleSocketConnection('text', 'close') && toggleSocketConnection('audio', 'close')) {
+            is_talking = false;
+            document.getElementById("start_talk_btn").innerHTML = "开始对话";
+        } else {
+            console.error("Error closing socket connections");
+        }
+    } else {
+        if (toggleSocketConnection('text', 'open') && toggleSocketConnection('audio', 'open')) {
+            is_talking = true;
+            document.getElementById("start_talk_btn").innerHTML = "结束对话";
+        } else {
+            console.error("Error Opening socket connections");
+            alert("建立websocket连接失败，请确认服务端是否已经启动 或 网络等问题");
+        }
+    }
+}
+
 
 function displayRealtimeText(realtimeText, displayDiv) {
     let displayedText = fullSentences.map((sentence, index) => {
@@ -62,19 +173,16 @@ function start_msg() {
         displayRealtimeText("👄  请开始说话  👄", displayDiv);
 };
 
-// Check server availability periodically
-setInterval(() => {
-    if (!server_available) {
-        connectToServer();
-    }
-}, serverCheckInterval);
+// Check server availability periodically 自动连接socket
+// setInterval(() => {
+//     if (!server_available) {
+//         connectToTextServer();
+//     }
+// }, serverCheckInterval);
 
 start_msg()
 
-textSocket.onopen = function(event) {
-    server_available = true;
-    start_msg()
-};
+
 
 // Request access to the microphone
 navigator.mediaDevices.getUserMedia({ audio: true })
@@ -99,19 +207,23 @@ navigator.mediaDevices.getUserMedia({ audio: true })
 
         // Send the 16-bit PCM data to the server
 
-        if (textSocket.readyState === WebSocket.OPEN) {
-            // Create a JSON string with metadata
-            let metadata = JSON.stringify({ sampleRate: audioContext.sampleRate });
-            // Convert metadata to a byte array
-            let metadataBytes = new TextEncoder().encode(metadata);
-            // Create a buffer for metadata length (4 bytes for 32-bit integer)
-            let metadataLength = new ArrayBuffer(4);
-            let metadataLengthView = new DataView(metadataLength);
-            // Set the length of the metadata in the first 4 bytes
-            metadataLengthView.setInt32(0, metadataBytes.byteLength, true); // true for little-endian
-            // Combine metadata length, metadata, and audio data into a single message
-            let combinedData = new Blob([metadataLength, metadataBytes, outputData.buffer]);
-            textSocket.send(combinedData);
+        if (textSocket) {
+
+        
+            if (textSocket.readyState === WebSocket.OPEN) {
+                // Create a JSON string with metadata
+                let metadata = JSON.stringify({ sampleRate: audioContext.sampleRate });
+                // Convert metadata to a byte array
+                let metadataBytes = new TextEncoder().encode(metadata);
+                // Create a buffer for metadata length (4 bytes for 32-bit integer)
+                let metadataLength = new ArrayBuffer(4);
+                let metadataLengthView = new DataView(metadataLength);
+                // Set the length of the metadata in the first 4 bytes
+                metadataLengthView.setInt32(0, metadataBytes.byteLength, true); // true for little-endian
+                // Combine metadata length, metadata, and audio data into a single message
+                let combinedData = new Blob([metadataLength, metadataBytes, outputData.buffer]);
+                textSocket.send(combinedData);
+            }
         }
     };
 })
@@ -169,20 +281,3 @@ function playNextAudio() {
     }
 }
 
-// 修改audioSocket.onmessage处理函数，以处理接收到的音频数据
-audioSocket.onmessage = function(event) {
-    let data = JSON.parse(event.data);
-
-    if (data.type === 'audio') {
-        onAudioReceived(data.audioData, data.format); // 使用音频数据和格式
-    }
-
-    // if (data.type === 'realtime') {
-    //     displayRealtimeText(data.text, displayDiv);
-    // } else if (data.type === 'fullSentence') {
-    //     fullSentences.push(data.text);
-    //     displayRealtimeText("", displayDiv); // 刷新显示以显示新的完整句子
-    // } else if (data.type === 'audio') {
-    //     onAudioReceived(data.audioUrl); // 处理接收到的音频数据
-    // }
-};

@@ -141,6 +141,14 @@ def llm_and_tts(prompt):
             # audio_player.play(data_json)
 
             asyncio.new_event_loop().run_until_complete(
+                send_to_client(
+                    json.dumps({
+                        'type': 'fullSentence',
+                        'text': data["content"]
+                    })
+                )
+            )
+            asyncio.new_event_loop().run_until_complete(
                 send_audio_to_client(voice_tmp_path)
             )
 
@@ -272,12 +280,20 @@ if __name__ == '__main__':
         'silero_sensitivity': 0.4,
         'webrtc_sensitivity': 2,
         'post_speech_silence_duration': 0.7,
-        'min_length_of_recording': 0,
-        'min_gap_between_recordings': 0,
+        # 指定录制会话应持续的最短持续时间（以秒为单位），以确保有意义的音频捕获，防止录制时间过短或碎片化。
+        'min_length_of_recording': 0.5,
+        # 在认为录制完成之前，语音之后必须保持沉默的持续时间（以秒为单位）。这可确保演讲过程中的任何短暂停顿都不会过早结束录制。
+        'post_speech_silence_duration': 3,
+        # 指定一个录制会话结束和另一个录制会话开始之间应存在的最小时间间隔（以秒为单位），以防止快速连续录制。
+        'min_gap_between_recordings': 1,
         'enable_realtime_transcription': True,
+        # 指定音频块转录后的时间间隔（以秒为单位）。较低的值将导致更“实时”（频繁）的转录更新，但可能会增加计算负载
         'realtime_processing_pause': 0,
         'realtime_model_type': 'tiny',
+        # 一个回调函数，每当实时听录中有更新时就会触发，并返回更高质量、稳定的文本作为其参数。
         'on_realtime_transcription_stabilized': text_detected,
+        # 音频在正式录制之前缓冲的时间跨度（以秒为单位）。这有助于抵消语音活动检测中固有的延迟，确保不会遗漏任何初始音频
+        'pre_recording_buffer_duration': 0.2,
     }
 
     
@@ -318,7 +334,7 @@ if __name__ == '__main__':
 
             my_logger.info(f"【识别内容】：{full_sentence}")
 
-            input_type = "keyword"
+            input_type = "auto"
 
             if input_type == "keyword":
                 for drop_cmd in config.get("recorder", "drop_cmd"):
@@ -380,6 +396,9 @@ if __name__ == '__main__':
 
                 if recoding_to_content == True:
                     recorder_content += full_sentence
+            elif input_type == "auto":
+                llm_and_tts(full_sentence)
+
 
     def decode_and_resample(
             audio_data,
