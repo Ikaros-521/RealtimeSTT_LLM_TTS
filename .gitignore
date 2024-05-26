@@ -158,3 +158,6 @@ log/*.txt
 Miniconda3
 pytransform
 pkg
+
+audiopen.py
+realtime_stt_llm_tts.py

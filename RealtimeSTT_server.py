@@ -91,74 +91,78 @@ def gpt_sovits_api(data):
     return None
 
 def llm_and_tts(prompt):
-    my_logger.info(f"【用户】：{prompt}")
+    try:
+        my_logger.info(f"【用户】：{prompt}")
 
-    # 实例化
-    client = ZhipuAI(api_key="") # 请填写您自己的APIKey
+        # 实例化
+        client = ZhipuAI(api_key="") # 请填写您自己的APIKey
 
-    response = client.chat.completions.create(
-        model="glm-3-turbo",  # 填写需要调用的模型名称
-        messages=[
-            {"role": "system", "content": "你是一个乐于解答各种问题的助手，你的任务是为用户提供专业、准确、有见地的建议。"},
-            {"role": "user", "content": prompt},
-        ],
-        stream=True,
-    )
+        response = client.chat.completions.create(
+            model="glm-3-turbo",  # 填写需要调用的模型名称
+            messages=[
+                {"role": "system", "content": "你是一个乐于解答各种问题的助手，你的任务是为用户提供专业、准确、有见地的建议。"},
+                {"role": "user", "content": prompt},
+            ],
+            stream=True,
+        )
 
-    tmp_content = ""
+        tmp_content = ""
 
-    for chunk in response:
-        tmp_content += chunk.choices[0].delta.content
-        if contains_chinese_punctuation(tmp_content):
-            my_logger.info(f"【LLM】：{tmp_content}")
-            # 进行tts合成
-            data = {
-                "type": config.get("gpt_sovits", "type"),
-                "ws_ip_port": config.get("gpt_sovits", "ws_ip_port"),
-                "api_ip_port": config.get("gpt_sovits", "api_ip_port"),
-                "ref_audio_path": config.get("gpt_sovits", "ref_audio_path"),
-                "prompt_text": config.get("gpt_sovits", "prompt_text"),
-                "prompt_language": config.get("gpt_sovits", "prompt_language"),
-                "language": config.get("gpt_sovits", "language"),
-                "cut": config.get("gpt_sovits", "cut"),
-                "webtts": config.get("gpt_sovits", "webtts"),
-                "content": tmp_content
-            }
-            voice_tmp_path = gpt_sovits_api(data)
-            # print(voice_tmp_path)
+        for chunk in response:
+            tmp_content += chunk.choices[0].delta.content
+            if contains_chinese_punctuation(tmp_content):
+                my_logger.info(f"【LLM】：{tmp_content}")
+                # 进行tts合成
+                data = {
+                    "type": config.get("gpt_sovits", "type"),
+                    "ws_ip_port": config.get("gpt_sovits", "ws_ip_port"),
+                    "api_ip_port": config.get("gpt_sovits", "api_ip_port"),
+                    "ref_audio_path": config.get("gpt_sovits", "ref_audio_path"),
+                    "prompt_text": config.get("gpt_sovits", "prompt_text"),
+                    "prompt_language": config.get("gpt_sovits", "prompt_language"),
+                    "language": config.get("gpt_sovits", "language"),
+                    "cut": config.get("gpt_sovits", "cut"),
+                    "webtts": config.get("gpt_sovits", "webtts"),
+                    "content": tmp_content
+                }
+                voice_tmp_path = gpt_sovits_api(data)
+                # print(voice_tmp_path)
 
-            data_json = {
-                "type": data["type"],
-                "voice_path": voice_tmp_path,
-                "content": data["content"],
-                "random_speed": {
-                    "enable": False,
-                    "max": 1.3,
-                    "min": 0.8
-                },
-                "speed": 1
-            }
-            # audio_player.play(data_json)
+                data_json = {
+                    "type": data["type"],
+                    "voice_path": voice_tmp_path,
+                    "content": data["content"],
+                    "random_speed": {
+                        "enable": False,
+                        "max": 1.3,
+                        "min": 0.8
+                    },
+                    "speed": 1
+                }
+                # audio_player.play(data_json)
 
-            asyncio.new_event_loop().run_until_complete(
-                send_to_client(
-                    json.dumps({
-                        'type': 'fullSentence',
-                        'text': data["content"]
-                    })
+                asyncio.new_event_loop().run_until_complete(
+                    send_to_client(
+                        json.dumps({
+                            'type': 'fullSentence',
+                            'text': data["content"]
+                        })
+                    )
                 )
-            )
-            asyncio.new_event_loop().run_until_complete(
-                send_audio_to_client(voice_tmp_path)
-            )
+                asyncio.new_event_loop().run_until_complete(
+                    send_audio_to_client(voice_tmp_path)
+                )
 
-            # 清空
-            tmp_content = ""
+                # 清空
+                tmp_content = ""
 
-        # my_logger.info(chunk)
-        if chunk.choices[0].finish_reason == "stop":
-            my_logger.info("任务完成")
-            return None
+            # my_logger.info(chunk)
+            if chunk.choices[0].finish_reason == "stop":
+                my_logger.info("任务完成")
+                return None
+    except Exception as e:
+        my_logger.error(traceback.format_exc())
+        return None
         
 if __name__ == '__main__':
     common = Common()
@@ -233,12 +237,15 @@ if __name__ == '__main__':
 
     recorder = None
     recorder_ready = threading.Event()
-    client_websocket = None
+    text_client_websocket = None
     audio_client_websocket = None
 
     async def send_to_client(message):
-        if client_websocket:
-            await client_websocket.send(message)
+        try:
+            if text_client_websocket:
+                await text_client_websocket.send(message)
+        except Exception as e:
+            my_logger.error(f"发送消息到客户端失败：{str(e)}")
 
     async def send_audio_to_client(audio_file_path):
         # 从文件扩展名中提取音频格式
@@ -283,7 +290,7 @@ if __name__ == '__main__':
         # 指定录制会话应持续的最短持续时间（以秒为单位），以确保有意义的音频捕获，防止录制时间过短或碎片化。
         'min_length_of_recording': 0.5,
         # 在认为录制完成之前，语音之后必须保持沉默的持续时间（以秒为单位）。这可确保演讲过程中的任何短暂停顿都不会过早结束录制。
-        'post_speech_silence_duration': 3,
+        'post_speech_silence_duration': 1,
         # 指定一个录制会话结束和另一个录制会话开始之间应存在的最小时间间隔（以秒为单位），以防止快速连续录制。
         'min_gap_between_recordings': 1,
         'enable_realtime_transcription': True,
@@ -420,8 +427,8 @@ if __name__ == '__main__':
 
     async def text_handler(websocket, path):
         print("text_handler Client connected")
-        global client_websocket
-        client_websocket = websocket
+        global text_client_websocket
+        text_client_websocket = websocket
         async for message in websocket:
 
             if not recorder_ready.is_set():
@@ -444,8 +451,9 @@ if __name__ == '__main__':
 
             print(message)
 
-    start_text_server = websockets.serve(text_handler, "localhost", 9001)
-    start_audio_server = websockets.serve(audio_handler, "localhost", 9002)
+    server_listen_ip = "0.0.0.0"
+    start_text_server = websockets.serve(text_handler, server_listen_ip, 9001)
+    start_audio_server = websockets.serve(audio_handler, server_listen_ip, 9002)
 
     recorder_thread = threading.Thread(target=recorder_thread)
     recorder_thread.start()

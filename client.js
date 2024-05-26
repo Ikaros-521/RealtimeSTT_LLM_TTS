@@ -1,5 +1,7 @@
 // let textSocket = new WebSocket("ws://localhost:9001");
 // let audioSocket = new WebSocket("ws://localhost:9002");
+
+let server_ip = "127.0.0.1";
 let textSocket = null;
 let audioSocket = null;
 let displayDiv = document.getElementById('textDisplay');
@@ -11,9 +13,13 @@ let is_talking = false;
 
 const serverCheckInterval = 5000; // Check every 5 seconds
 
+
+
 function connectToTextServer() {
     try {
-        textSocket = new WebSocket("ws://localhost:9001");
+        textSocket = new WebSocket(`ws://${server_ip}:9001`);
+
+        console.log(`ws://${server_ip}:90012`);
 
         textSocket.onopen = function(event) {
             server_available = true;
@@ -31,12 +37,36 @@ function connectToTextServer() {
             }
         };
 
-        audioSocket.onerror = function(event) {
+        textSocket.onerror = function(event) {
             // 处理连接错误
             console.error("Text WebSocket connection error.");
         };
 
         textSocket.onclose = function(event) {
+            
+            // 检查 WebSocket 的 readyState，确保它仍然处于 OPEN 状态
+            if (textSocket.readyState === WebSocket.OPEN) {
+                // 准备发送的音频数据，这里你可以根据需要选择数据
+                let dummyAudioData = new Float32Array(256); // 示例：256 个浮点数的数组
+                let outputData = new Int16Array(dummyAudioData.length);
+
+                // 转换为 16 位 PCM，这里只是示例，具体数据应根据实际情况填充
+                for (let i = 0; i < dummyAudioData.length; i++) {
+                    outputData[i] = Math.max(-32768, Math.min(32767, dummyAudioData[i] * 32768));
+                }
+
+                // 准备发送数据的其他部分，比如元数据等
+                let metadata = JSON.stringify({ sampleRate: audioContext.sampleRate });
+                let metadataBytes = new TextEncoder().encode(metadata);
+                let metadataLength = new ArrayBuffer(4);
+                let metadataLengthView = new DataView(metadataLength);
+                metadataLengthView.setInt32(0, metadataBytes.byteLength, true); // true 表示小端字节序
+                let combinedData = new Blob([metadataLength, metadataBytes, outputData.buffer]);
+
+                // 发送数据
+                textSocket.send(combinedData);
+            }
+
             server_available = false;
         };
 
@@ -51,7 +81,9 @@ function connectToTextServer() {
 // 连接到音频服务器
 function connectToAudioServer() {
     try {
-        audioSocket = new WebSocket("ws://localhost:9002");
+        audioSocket = new WebSocket(`ws://${server_ip}:9002`);
+
+        console.log(`ws://${server_ip}:9002`);
 
         audioSocket.onopen = function(event) {
             // 处理连接打开
@@ -133,10 +165,15 @@ function toggleSocketConnection(socketType, action) {
     
 }
 
+// 开始结束对话 按钮 触发
 function start_talk() {
+    if (document.getElementById('server_ip').value != "") server_ip = document.getElementById('server_ip').value;
+
     if (is_talking) {
         if (toggleSocketConnection('text', 'close') && toggleSocketConnection('audio', 'close')) {
             is_talking = false;
+            // 清空音频播放队列
+            clearAudioQueue();
             document.getElementById("start_talk_btn").innerHTML = "开始对话";
         } else {
             console.error("Error closing socket connections");
@@ -152,7 +189,7 @@ function start_talk() {
     }
 }
 
-
+// 前端显示实时传输来的文本内容
 function displayRealtimeText(realtimeText, displayDiv) {
     let displayedText = fullSentences.map((sentence, index) => {
         let span = document.createElement('span');
@@ -184,52 +221,129 @@ start_msg()
 
 
 
-// Request access to the microphone
+let audioContext, source, processor; // 将这些变量移至更高的作用域
+let mic_active = true; // 麦克风是否激活的标志位
+
+function toggleMicrophone(active) {
+    mic_active = active;
+    if (!mic_active && processor) {
+        processor.disconnect(); // 断开处理器连接
+    } else if (mic_active && processor && audioContext && source) {
+        source.connect(processor);
+        processor.connect(audioContext.destination); // 重新连接处理器
+    }
+}
+
+
+// 请求麦克风访问权限
 navigator.mediaDevices.getUserMedia({ audio: true })
 .then(stream => {
-    let audioContext = new AudioContext();
-    let source = audioContext.createMediaStreamSource(stream);
-    let processor = audioContext.createScriptProcessor(256, 1, 1);
+    audioContext = new AudioContext();
+    source = audioContext.createMediaStreamSource(stream);
+    processor = audioContext.createScriptProcessor(256, 1, 1);
 
     source.connect(processor);
     processor.connect(audioContext.destination);
     mic_available = true;
-    start_msg()
+    start_msg();
 
+    // onaudioprocess 事件处理函数以检查麦克风是否激活
     processor.onaudioprocess = function(e) {
+        if (!mic_active) return; // 如果麦克风未激活，则直接返回
+
         let inputData = e.inputBuffer.getChannelData(0);
         let outputData = new Int16Array(inputData.length);
 
-        // Convert to 16-bit PCM
+        // 转换为 16 位 PCM
         for (let i = 0; i < inputData.length; i++) {
             outputData[i] = Math.max(-32768, Math.min(32767, inputData[i] * 32768));
         }
 
-        // Send the 16-bit PCM data to the server
-
-        if (textSocket) {
-
-        
-            if (textSocket.readyState === WebSocket.OPEN) {
-                // Create a JSON string with metadata
-                let metadata = JSON.stringify({ sampleRate: audioContext.sampleRate });
-                // Convert metadata to a byte array
-                let metadataBytes = new TextEncoder().encode(metadata);
-                // Create a buffer for metadata length (4 bytes for 32-bit integer)
-                let metadataLength = new ArrayBuffer(4);
-                let metadataLengthView = new DataView(metadataLength);
-                // Set the length of the metadata in the first 4 bytes
-                metadataLengthView.setInt32(0, metadataBytes.byteLength, true); // true for little-endian
-                // Combine metadata length, metadata, and audio data into a single message
-                let combinedData = new Blob([metadataLength, metadataBytes, outputData.buffer]);
-                textSocket.send(combinedData);
-            }
+        // 如果麦克风激活且 WebSocket 连接打开，发送 16 位 PCM 数据到服务器
+        if (textSocket && textSocket.readyState === WebSocket.OPEN) {
+            let metadata = JSON.stringify({ sampleRate: audioContext.sampleRate });
+            let metadataBytes = new TextEncoder().encode(metadata);
+            let metadataLength = new ArrayBuffer(4);
+            let metadataLengthView = new DataView(metadataLength);
+            metadataLengthView.setInt32(0, metadataBytes.byteLength, true); // true 表示小端字节序
+            let combinedData = new Blob([metadataLength, metadataBytes, outputData.buffer]);
+            textSocket.send(combinedData);
         }
     };
 })
 .catch(e => console.error(e));
 
 
+/*
+function handleStream(stream) {
+    audioContext = new AudioContext();
+    source = audioContext.createMediaStreamSource(stream);
+    processor = audioContext.createScriptProcessor(256, 1, 1);
+
+    source.connect(processor);
+    processor.connect(audioContext.destination);
+    mic_available = true;
+    start_msg();
+
+    // onaudioprocess 事件处理函数以检查麦克风是否激活
+    processor.onaudioprocess = function(e) {
+        if (!mic_active) return; // 如果麦克风未激活，则直接返回
+
+        let inputData = e.inputBuffer.getChannelData(0);
+        let outputData = new Int16Array(inputData.length);
+
+        // 转换为 16 位 PCM
+        for (let i = 0; i < inputData.length; i++) {
+            outputData[i] = Math.max(-32768, Math.min(32767, inputData[i] * 32768));
+        }
+
+        // 如果麦克风激活且 WebSocket 连接打开，发送 16 位 PCM 数据到服务器
+        if (textSocket && textSocket.readyState === WebSocket.OPEN) {
+            let metadata = JSON.stringify({ sampleRate: audioContext.sampleRate });
+            let metadataBytes = new TextEncoder().encode(metadata);
+            let metadataLength = new ArrayBuffer(4);
+            let metadataLengthView = new DataView(metadataLength);
+            metadataLengthView.setInt32(0, metadataBytes.byteLength, true); // true 表示小端字节序
+            let combinedData = new Blob([metadataLength, metadataBytes, outputData.buffer]);
+            textSocket.send(combinedData);
+        }
+    };
+}
+
+
+
+if (navigator.mediaDevices) {
+    // 使用新的 API
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(handleStream)
+        .catch(err => {
+            if (err.name === 'NotAllowedError') {
+                alert('请允许访问麦克风以使用该功能。');
+            } else {
+                console.error('无法获取麦克风流: ' + err);
+            }
+        });
+} else {
+    // 使用旧的 API 作为回退
+    navigator.getUserMedia =
+        navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia;
+
+    if (navigator.getUserMedia) {
+        navigator.getUserMedia(
+            { audio: true },
+            handleStream,
+            err => {
+                console.error('无法获取麦克风流: ' + err);
+            }
+        );
+    } else {
+        console.log('您的浏览器不支持getUserMedia API');
+    }
+}
+*/
 
 let audioQueue = []; // 音频播放队列
 let isPlaying = false; // 标记当前是否有音频正在播放
@@ -254,6 +368,10 @@ function base64ToBlob(base64, mimeType) {
     return blob;
 }
 
+// 清空音频播放队列
+function clearAudioQueue() {
+    audioQueue = [];
+}
 
 // 当接收到音频数据时的处理函数
 function onAudioReceived(audioData, audioFormat) {
@@ -268,6 +386,7 @@ function onAudioReceived(audioData, audioFormat) {
 // 播放队列中的下一个音频
 function playNextAudio() {
     if (!isPlaying && audioQueue.length > 0) {
+        toggleMicrophone(false); // 停用麦克风
         isPlaying = true; // 标记为正在播放
         let audioData = audioQueue.shift(); // 从队列中取出第一个音频数据
         let audio = new Audio(audioData); // 创建一个新的Audio对象来播放音频
@@ -276,6 +395,7 @@ function playNextAudio() {
         // 当音频播放完成时
         audio.onended = function() {
             isPlaying = false; // 标记为播放完成
+            toggleMicrophone(true); // 重新启用麦克风
             playNextAudio(); // 尝试播放队列中的下一个音频
         };
     }
