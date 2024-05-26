@@ -63,7 +63,7 @@
     "prompt_template": "当前中国北京日期：{current_date}，根据以下数据进行总结并提供答案。如果问题与数据不相关，使用你的常规知识回答，不可以胡编乱造！。\n参考数据：{summary_content}\n问题：{recorder_content}"
   },
   "zhipu": {
-    "api_key": "",
+    "api_key": "a03d9e9ba20bdd8ba1ecc13a06a27834.zPGhDMnCZQpL6DZq",
     "model": "glm-3-turbo",
     "system": "你是一个乐于解答各种问题的助手，你的任务是为用户提供专业、准确、有见地的建议。",
     "app_id": "1761340125461340161",

@@ -383,11 +383,6 @@ def goto_func_page():
                 config_data["recorder"]["drop_cmd"] = common_textarea_handle(textarea_recorder_drop_cmd.value)
                 config_data["recorder"]["get_mouse_coordinate_cmd"] = common_textarea_handle(textarea_recorder_get_mouse_coordinate_cmd.value)
 
-                config_data["audiopen"]["start_x"] = int(input_audiopen_start_x.value)
-                config_data["audiopen"]["start_y"] = int(input_audiopen_start_y.value)
-                config_data["audiopen"]["stop_x"] = int(input_audiopen_stop_x.value)
-                config_data["audiopen"]["stop_y"] = int(input_audiopen_stop_y.value)
-
                 config_data["openai"]["api"] = input_openai_api.value
                 config_data["openai"]["api_key"] = common_textarea_handle(textarea_openai_api_key.value)
                 # logging.info(select_chatgpt_model.value)
@@ -583,13 +578,6 @@ def goto_func_page():
                     textarea_recorder_stop_cmd = ui.textarea(label='停止记录录音命令', value=textarea_data_change(config.get("recorder", "stop_cmd")), placeholder='停止记录录音数据的命令，支持多个，换行进行分隔').style("width:400px;")
                     textarea_recorder_drop_cmd = ui.textarea(label='丢弃记录录音命令', value=textarea_data_change(config.get("recorder", "drop_cmd")), placeholder='丢弃记录录音数据的命令，支持多个，换行进行分隔').style("width:400px;")
                     textarea_recorder_get_mouse_coordinate_cmd = ui.textarea(label='获取鼠标坐标命令', value=textarea_data_change(config.get("recorder", "get_mouse_coordinate_cmd")), placeholder='获取鼠标坐标命令，支持多个，换行进行分隔').style("width:400px;")
-            with ui.card().style(card_css):
-                ui.label("AudioPan")
-                with ui.row():   
-                    input_audiopen_start_x = ui.input(label='开始录音键x坐标', value=config.get("audiopen", "start_x"), placeholder='开始录音命令触发后鼠标点击的x坐标').style("width:250px;")
-                    input_audiopen_start_y = ui.input(label='开始录音键y坐标', value=config.get("audiopen", "start_y"), placeholder='开始录音命令触发后鼠标点击的y坐标').style("width:250px;")
-                    input_audiopen_stop_x = ui.input(label='开始录音键x坐标', value=config.get("audiopen", "start_x"), placeholder='开始录音命令触发后鼠标点击的x坐标').style("width:250px;")
-                    input_audiopen_stop_y = ui.input(label='开始录音键y坐标', value=config.get("audiopen", "start_y"), placeholder='开始录音命令触发后鼠标点击的y坐标').style("width:250px;")
 
             with ui.card().style(card_css):
                         ui.label("ChatGPT")

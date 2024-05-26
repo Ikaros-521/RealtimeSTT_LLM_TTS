@@ -159,5 +159,6 @@ Miniconda3
 pytransform
 pkg
 
-audiopen.py
-realtime_stt_llm_tts.py
+audiopen2.py
+realtime_stt_llm_tts2.py
+webui.py
