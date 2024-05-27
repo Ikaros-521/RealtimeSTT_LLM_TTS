@@ -1014,46 +1014,4 @@ class Common:
         return check_useful(data_json)
 
 
-    def check_useful(self):
-        import ntplib
-
-        def get_ntp_time(server="ntp.aliyun.com"):
-            c = ntplib.NTPClient()
-            response = c.request(server, version=3)
-            return response.tx_time
-
-        # 获取网络时间的时间戳
-        timestamp = get_ntp_time()
-
-        import requests
-        import json
-
-        # 指定要下载的 JSON 文件的 URL
-        url = 'https://github.com/Ikaros-521/Ikaros-521/releases/download/data/data.json'
-
-        try:
-            # 发送 GET 请求下载 JSON 文件内容
-            response = requests.get(url)
-
-            # 确保请求成功
-            if response.status_code == 200:
-                # 解析 JSON 数据到字典
-                data = json.loads(response.text)
-
-                # 打印字典内容
-                logging.debug(data)
-
-                tmp = float(data["RealtimeSTT"]["1"]["expiration_time"]) - float(timestamp)
-                if tmp > 0:
-                    logging.info(f"账号剩余可用时长：{tmp / 60 / 60}小时")
-                    return {"ret": 0, "msg": f"账号剩余可用时长：{tmp / 60 / 60}小时"}
-                else:
-                    logging.warning(f"账号已到期，请续费后使用")
-                    return {"ret": 1, "msg": f"账号已到期，请续费后使用"}
-            else:
-                logging.error(f"请求失败，状态码：{response.status_code}")
-                return {"ret": 2, "msg": str(e)}
-        except Exception as e:
-            logging.error(traceback.format_exc())
-            return {"ret": 3, "msg": str(e)}
 

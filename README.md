@@ -1,3 +1,70 @@
+# 中文说明
+
+## 安装
+
+### GPU Support with CUDA (recommended)
+
+Additional steps are needed for a **GPU-optimized** installation. These steps are recommended for those who require **better performance** and have a compatible NVIDIA GPU.
+
+> **Note**: *To check if your NVIDIA GPU supports CUDA, visit the [official CUDA GPUs list](https://developer.nvidia.com/cuda-gpus).*
+
+To use RealtimeSTT with GPU support via CUDA please follow these steps:
+
+1. **Install NVIDIA CUDA Toolkit 11.8**:
+    - Visit [NVIDIA CUDA Toolkit Archive](https://developer.nvidia.com/cuda-11-8-0-download-archive).
+    - Select operating system and version.
+    - Download and install the software.
+
+2. **Install NVIDIA cuDNN 8.7.0 for CUDA 11.x**:
+    - Visit [NVIDIA cuDNN Archive](https://developer.nvidia.com/rdp/cudnn-archive).
+    - Click on "Download cuDNN v8.7.0 (November 28th, 2022), for CUDA 11.x".
+    - Download and install the software.
+
+3. **Install ffmpeg**:
+
+    You can download an installer for your OS from the [ffmpeg Website](https://ffmpeg.org/download.html).  
+    
+    Or use a package manager:
+
+    - **On Ubuntu or Debian**:
+        ```bash
+        sudo apt update && sudo apt install ffmpeg
+        ```
+
+    - **On Arch Linux**:
+        ```bash
+        sudo pacman -S ffmpeg
+        ```
+
+    - **On MacOS using Homebrew** ([https://brew.sh/](https://brew.sh/)):
+        ```bash
+        brew install ffmpeg
+        ```
+
+    - **On Windows using Chocolatey** ([https://chocolatey.org/](https://chocolatey.org/)):
+        ```bash
+        choco install ffmpeg
+        ```
+
+    - **On Windows using Scoop** ([https://scoop.sh/](https://scoop.sh/)):
+        ```bash
+        scoop install ffmpeg
+        ```    
+
+4. **Install PyTorch with CUDA support**:
+    ```bash
+    pip uninstall torch
+    pip install torch==2.0.1+cu118 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+
+### 其他依赖
+
+`pip install -r requirements.txt`
+
+## 更新日志
+- 2024-05-28
+    - 补充个webui，方便配置（不过并不完整，凑合用）
+    - 补充了gpt-sovits的新api的兼容
+
 
 # RealtimeSTT
 
@@ -65,7 +132,7 @@ This library uses:
 *These components represent the "industry standard" for cutting-edge applications, providing the most modern and effective foundation for building high-end solutions.*
 
 
-## Installation
+## Installation 安装
 
 ```bash
 pip install RealtimeSTT

@@ -1,5 +1,5 @@
 {
-  "run_py": "realtime_stt_llm_tts",
+  "run_py": "RealtimeSTT_server2",
   "recorder": {
     "device_index": 0,
     "start_cmd": [
@@ -207,14 +207,33 @@
   },
   "gpt_sovits": {
     "type": "webtts",
-    "ws_ip_port": "ws://localhost:9872/queue/join",
+    "gradio_ip_port": "http://127.0.0.1:9872",
     "api_ip_port": "http://127.0.0.1:9880",
+    "ws_ip_port": "ws://localhost:9872/queue/join",
     "ref_audio_path": "F:\\GPT-SoVITS\\raws\\ikaros\\21.wav",
     "prompt_text": "マスター、どうりょくろか、いいえ、なんでもありません",
     "prompt_language": "日文",
-    "language": "zh",
+    "language": "自动识别",
     "cut": "凑四句一切",
+    "gpt_model_path": "F:\\GPT-SoVITS\\GPT_weights\\ikaros-e15.ckpt",
+    "sovits_model_path": "F:\\GPT-SoVITS\\SoVITS_weights\\ikaros_e8_s280.pth",
+    "api_0322": {
+      "text_lang": "中英混合",
+      "ref_audio_path": "F:\\GPT-SoVITS\\raws\\ikaros\\21.wav",
+      "prompt_text": "マスター、どうりょくろか、いいえ、なんでもありません",
+      "prompt_lang": "日文",
+      "top_k": 1,
+      "top_p": 0.8,
+      "temperature": 0.8,
+      "text_split_method": "按标点符号切",
+      "batch_size": 20,
+      "speed_factor": 1.0,
+      "split_bucket": false,
+      "return_fragment": false,
+      "fragment_interval": "0.3"
+    },
     "webtts": {
+      "version": "1",
       "api_ip_port": "http://127.0.0.1:8080",
       "spk": "sanyueqi",
       "lang": "zh",

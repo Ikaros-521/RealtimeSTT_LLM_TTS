@@ -1,5 +1,5 @@
 from RealtimeSTT import AudioToTextRecorder
-import asyncio
+import asyncio, aiohttp
 import websockets
 import threading
 import numpy as np
@@ -116,7 +116,38 @@ def contains_chinese_punctuation(s):
             return True
     return False
 
-def gpt_sovits_api(data):
+async def download_audio(self, type: str, file_url: str, timeout: int=30, request_type: str="get", data=None, json_data=None):
+    async with aiohttp.ClientSession() as session:
+        try:
+            if request_type == "get":
+                async with session.get(file_url, params=data, timeout=timeout) as response:
+                    if response.status == 200:
+                        content = await response.read()
+                        file_name = type + '_' + common.get_bj_time(4) + '.wav'
+                        voice_tmp_path = common.get_new_audio_path(config.get("play_audio", "out_path"), file_name)
+                        with open(voice_tmp_path, 'wb') as file:
+                            file.write(content)
+                        return voice_tmp_path
+                    else:
+                        logging.error(f'{type} 下载音频失败: {response.status}')
+                        return None
+            else:
+                async with session.post(file_url, data=data, json=json_data, timeout=timeout) as response:
+                    if response.status == 200:
+                        content = await response.read()
+                        file_name = type + '_' + common.get_bj_time(4) + '.wav'
+                        voice_tmp_path = common.get_new_audio_path(config.get("play_audio", "out_path"), file_name)
+                        with open(voice_tmp_path, 'wb') as file:
+                            file.write(content)
+                        return voice_tmp_path
+                    else:
+                        logging.error(f'{type} 下载音频失败: {response.status}')
+                        return None
+        except asyncio.TimeoutError:
+            logging.error("{type} 下载音频超时")
+            return None
+        
+async def gpt_sovits_api(data):
     try:
         my_logger.debug(f"data={data}")
 
@@ -146,6 +177,34 @@ def gpt_sovits_api(data):
             except Exception as e:
                 my_logger.error(traceback.format_exc())
                 my_logger.error(f'gpt_sovits未知错误: {e}')
+        elif data["type"] == "api_0322":
+            try:
+
+                data_json = {
+                    "text": data["content"],
+                    "text_lang": data["api_0322"]["text_lang"],
+                    "ref_audio_path": data["api_0322"]["ref_audio_path"],
+                    "prompt_text": data["api_0322"]["prompt_text"],
+                    "prompt_lang": data["api_0322"]["prompt_lang"],
+                    "top_k": data["api_0322"]["top_k"],
+                    "top_p": data["api_0322"]["top_p"],
+                    "temperature": data["api_0322"]["temperature"],
+                    "text_split_method": data["api_0322"]["text_split_method"],
+                    "batch_size":int(data["api_0322"]["batch_size"]),
+                    "speed_factor":float(data["api_0322"]["speed_factor"]),
+                    "split_bucket":data["api_0322"]["split_bucket"],
+                    "return_fragment":data["api_0322"]["return_fragment"],
+                    "fragment_interval":data["api_0322"]["fragment_interval"],
+                }
+                                    
+                return await download_audio("gpt_sovits", data["api_ip_port"], 60, "post", None, data_json)
+            except aiohttp.ClientError as e:
+                my_logger.error(traceback.format_exc())
+                my_logger.error(f'gpt_sovits请求失败: {e}')
+            except Exception as e:
+                my_logger.error(traceback.format_exc())
+                my_logger.error(f'gpt_sovits未知错误: {e}')
+        
         elif data["type"] == "webtts":
             try:
                 params = {
@@ -214,7 +273,7 @@ async def llm_and_tts(client_id, prompt, client_type="text"):
                     "webtts": config.get("gpt_sovits", "webtts"),
                     "content": tmp_content
                 }
-                voice_tmp_path = gpt_sovits_api(data)
+                voice_tmp_path = await gpt_sovits_api(data)
                 # print(voice_tmp_path)
 
                 data_json = {
