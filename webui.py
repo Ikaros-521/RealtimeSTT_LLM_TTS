@@ -626,7 +626,7 @@ def goto_func_page():
                     options=audio_synthesis_type_options, 
                     value=config.get("audio_synthesis_type")
                 ).style("width:200px;")
-            with ui.card().style(card_css):
+            with ui.card().style("display:none"):
                 ui.label("录音配置")
                 with ui.row():
                     audio_device_info_list = common.get_all_audio_device_info("in")
