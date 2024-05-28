@@ -60,6 +60,8 @@ To use RealtimeSTT with GPU support via CUDA please follow these steps:
 
 `pip install -r requirements.txt`
 
+Win如果装不上webrtcvad，提示了VS C++相关的报错，请下载[https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/](https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/)，安装C++开发相关工具，然后重新安装依赖。
+
 ## 更新日志
 - 2024-05-28
     - 补充个webui，方便配置（不过并不完整，凑合用）
