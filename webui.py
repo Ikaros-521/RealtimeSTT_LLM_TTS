@@ -700,7 +700,10 @@ def goto_func_page():
                     select_zhipu_model = ui.select(
                         label='模型', 
                         options=data_json, 
-                        value=config.get("zhipu", "model")
+                        value=config.get("zhipu", "model"),
+                        with_input=True,
+                        new_value_mode='add-unique',
+                        clearable=True
                     )
                     input_zhipu_app_id = ui.input(label='应用ID', value=config.get("zhipu", "app_id"), placeholder='在 模型为：应用，会自动检索你平台上添加的所有应用信息，然后从日志中复制你需要的应用ID即可').style("width:200px")
                     
