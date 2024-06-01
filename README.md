@@ -23,38 +23,43 @@ To use RealtimeSTT with GPU support via CUDA please follow these steps:
 3. **Install ffmpeg**:
 
     You can download an installer for your OS from the [ffmpeg Website](https://ffmpeg.org/download.html).  
-    
     Or use a package manager:
 
     - **On Ubuntu or Debian**:
+
         ```bash
         sudo apt update && sudo apt install ffmpeg
         ```
 
     - **On Arch Linux**:
+
         ```bash
         sudo pacman -S ffmpeg
         ```
 
     - **On MacOS using Homebrew** ([https://brew.sh/](https://brew.sh/)):
+
         ```bash
         brew install ffmpeg
         ```
 
     - **On Windows using Chocolatey** ([https://chocolatey.org/](https://chocolatey.org/)):
+
         ```bash
         choco install ffmpeg
         ```
 
     - **On Windows using Scoop** ([https://scoop.sh/](https://scoop.sh/)):
+
         ```bash
         scoop install ffmpeg
-        ```    
+        ```
 
 4. **Install PyTorch with CUDA support**:
+
     ```bash
-    pip uninstall torch
-    pip install torch==2.0.1+cu118 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+        pip uninstall torch
+        pip install torch==2.0.1+cu118 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
 
 ### 其他依赖
 
@@ -63,9 +68,14 @@ To use RealtimeSTT with GPU support via CUDA please follow these steps:
 Win如果装不上webrtcvad，提示了VS C++相关的报错，请下载[https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/](https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/)，安装C++开发相关工具，然后重新安装依赖。
 
 ## 更新日志
+
+- 2024-06-02
+  - 新增了OpenAI接口的接入，测了ollama，没啥问题
+  - 新增了Edge-TTS的接入（方便测试）
+
 - 2024-05-28
-    - 补充个webui，方便配置（不过并不完整，凑合用）
-    - 补充了gpt-sovits的新api的兼容
+  - 补充个webui，方便配置（不过并不完整，凑合用）
+  - 补充了gpt-sovits的新api的兼容
 
 
 # RealtimeSTT

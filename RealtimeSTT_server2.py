@@ -146,7 +146,27 @@ async def download_audio(self, type: str, file_url: str, timeout: int=30, reques
         except asyncio.TimeoutError:
             logging.error("{type} 下载音频超时")
             return None
-        
+
+# 请求Edge-TTS接口获取合成后的音频路径
+async def edge_tts_api(data):
+    import edge_tts
+
+    try:
+        file_name = 'edge_tts_' + common.get_bj_time(4) + '.mp3'
+        voice_tmp_path = common.get_new_audio_path(config.get("play_audio", "out_path"), file_name)
+        # voice_tmp_path = './out/' + common.get_bj_time(4) + '.mp3'
+        # 过滤" '字符
+        data["content"] = data["content"].replace('"', '').replace("'", '')
+        # 使用 Edge TTS 生成回复消息的语音文件
+        communicate = edge_tts.Communicate(text=data["content"], voice=data["voice"], rate=data["rate"], volume=data["volume"])
+        await communicate.save(voice_tmp_path)
+
+        return voice_tmp_path
+    except Exception as e:
+        my_logger.error(traceback.format_exc())
+        my_logger.error(e)
+        return None
+
 async def gpt_sovits_api(data):
     try:
         my_logger.debug(f"data={data}")
@@ -240,72 +260,148 @@ async def gpt_sovits_api(data):
 
 async def llm_and_tts(client_id, prompt, client_type="text"):
     try:
-        my_logger.info(f"【用户】：{prompt}")
-
-        # 实例化
-        client = ZhipuAI(api_key=config.get("zhipu", "api_key")) # 请填写您自己的APIKey
-
-        response = client.chat.completions.create(
-            model=config.get("zhipu", "model"),  # 填写需要调用的模型名称
-            messages=[
-                {"role": "system", "content": config.get("zhipu", "system")},
-                {"role": "user", "content": prompt},
-            ],
-            stream=True,
-        )
-
-        tmp_content = ""
-
-        for chunk in response:
-            tmp_content += chunk.choices[0].delta.content
+        async def tts_handle(tmp_content):
             if contains_chinese_punctuation(tmp_content):
                 my_logger.info(f"【LLM】：{tmp_content}")
-                # 进行tts合成
-                data = {
-                    "type": config.get("gpt_sovits", "type"),
-                    "ws_ip_port": config.get("gpt_sovits", "ws_ip_port"),
-                    "api_ip_port": config.get("gpt_sovits", "api_ip_port"),
-                    "ref_audio_path": config.get("gpt_sovits", "ref_audio_path"),
-                    "prompt_text": config.get("gpt_sovits", "prompt_text"),
-                    "prompt_language": config.get("gpt_sovits", "prompt_language"),
-                    "language": config.get("gpt_sovits", "language"),
-                    "cut": config.get("gpt_sovits", "cut"),
-                    "webtts": config.get("gpt_sovits", "webtts"),
-                    "content": tmp_content
-                }
-                voice_tmp_path = await gpt_sovits_api(data)
-                # print(voice_tmp_path)
 
-                data_json = {
-                    "type": data["type"],
-                    "voice_path": voice_tmp_path,
-                    "content": data["content"],
-                    "random_speed": {
-                        "enable": False,
-                        "max": 1.3,
-                        "min": 0.8
-                    },
-                    "speed": 1
-                }
-                # audio_player.play(data_json)
+                voice_tmp_path = None
 
-                await send_to_client(
-                    client_id,
-                    json.dumps({
-                        'type': 'fullSentence',
-                        'text': data["content"]
-                    }),
-                    client_type
+                if config.get("audio_synthesis_type") == "gpt_sovits":
+                    # 进行tts合成
+                    data = {
+                        "type": config.get("gpt_sovits", "type"),
+                        "ws_ip_port": config.get("gpt_sovits", "ws_ip_port"),
+                        "api_ip_port": config.get("gpt_sovits", "api_ip_port"),
+                        "ref_audio_path": config.get("gpt_sovits", "ref_audio_path"),
+                        "prompt_text": config.get("gpt_sovits", "prompt_text"),
+                        "prompt_language": config.get("gpt_sovits", "prompt_language"),
+                        "language": config.get("gpt_sovits", "language"),
+                        "cut": config.get("gpt_sovits", "cut"),
+                        "webtts": config.get("gpt_sovits", "webtts"),
+                        "content": tmp_content
+                    }
+                    voice_tmp_path = await gpt_sovits_api(data)
+                    # print(voice_tmp_path)
+                elif config.get("audio_synthesis_type") == "edge-tts":
+                    data = {
+                        "type": config.get("audio_synthesis_type"),
+                        "voice": "zh-CN-XiaoyiNeural",
+                        "rate": "+0%",
+                        "volume": "+0%",
+                        "content": tmp_content
+                    }
+                    voice_tmp_path = await edge_tts_api(data)
+
+                if voice_tmp_path is not None:
+                    my_logger.info(f"【TTS】音频合成完毕，输出在：{voice_tmp_path}")
+
+                    data_json = {
+                        "type": data["type"],
+                        "voice_path": voice_tmp_path,
+                        "content": data["content"],
+                        "random_speed": {
+                            "enable": False,
+                            "max": 1.3,
+                            "min": 0.8
+                        },
+                        "speed": 1
+                    }
+                    # audio_player.play(data_json)
+
+                    await send_to_client(
+                        client_id,
+                        json.dumps({
+                            'type': 'fullSentence',
+                            'text': data["content"]
+                        }),
+                        client_type
+                    )
+                    await send_audio_to_client(client_id, voice_tmp_path)
+
+                    return True
+            return False
+                
+        my_logger.info(f"【用户】：{prompt}")
+
+        response = None
+        tmp_content = ""
+
+        if config.get("chat_type") == "zhipu":
+            # 实例化
+            client = ZhipuAI(api_key=config.get("zhipu", "api_key")) # 请填写您自己的APIKey
+
+            response = client.chat.completions.create(
+                model=config.get("zhipu", "model"),  # 填写需要调用的模型名称
+                messages=[
+                    {"role": "system", "content": config.get("zhipu", "system")},
+                    {"role": "user", "content": prompt},
+                ],
+                stream=True,
+            )
+
+            for chunk in response:
+                tmp_content += chunk.choices[0].delta.content
+                ret = await tts_handle(tmp_content)
+                if ret:
+                    # 清空文本
+                    tmp_content = ""
+
+                # my_logger.info(chunk)
+                if chunk.choices[0].finish_reason == "stop":
+                    my_logger.info("任务完成")
+                    return None
+        elif config.get("chat_type") == "chatgpt":
+            import openai
+            from packaging import version
+
+            # 判断openai库版本，1.x.x和0.x.x有破坏性更新
+            if version.parse(openai.__version__) < version.parse('1.0.0'):
+                openai.api_base = config.get("openai", "api")
+                openai.api_key = config.get("openai", "api_key")[0]
+
+                response = openai.ChatCompletion.create(
+                    model=config.get("chatgpt", "model"),
+                    messages=[
+                        {"role": "system", "content": config.get("zhipu", "preset")},
+                        {"role": "user", "content": prompt},
+                    ],
+                    top_p=config.get("chatgpt", "top_p"),
+                    temperature=config.get("chatgpt", "temperature"),
+                    presence_penalty=config.get("chatgpt", "presence_penalty"),
+                    frequency_penalty=config.get("chatgpt", "frequency_penalty"),
+                    stream=True,
                 )
-                await send_audio_to_client(client_id, voice_tmp_path)
+            else:
+                my_logger.debug(f"base_url={openai.api_base}, api_key={openai.api_key}")
 
-                # 清空
-                tmp_content = ""
+                client = openai.OpenAI(base_url=openai.api_base, api_key=openai.api_key)
 
-            # my_logger.info(chunk)
-            if chunk.choices[0].finish_reason == "stop":
-                my_logger.info("任务完成")
-                return None
+                # 调用 ChatGPT 接口生成回复消息
+                response = client.chat.completions.create(
+                    model=config.get("chatgpt", "model"),
+                    messages=[
+                        {"role": "system", "content": config.get("zhipu", "preset")},
+                        {"role": "user", "content": prompt},
+                    ],
+                    top_p=config.get("chatgpt", "top_p"),
+                    temperature=config.get("chatgpt", "temperature"),
+                    presence_penalty=config.get("chatgpt", "presence_penalty"),
+                    frequency_penalty=config.get("chatgpt", "frequency_penalty"),
+                    stream=True,
+                )
+
+
+            for chunk in response:
+                tmp_content += chunk.choices[0].delta.content
+                ret = await tts_handle(tmp_content)
+                if ret:
+                    # 清空文本
+                    tmp_content = ""
+
+                # my_logger.info(chunk)
+                if chunk.choices[0].finish_reason == "stop":
+                    my_logger.info("任务完成")
+                    return None
     except Exception as e:
         my_logger.error(traceback.format_exc())
         return None
@@ -638,6 +734,7 @@ if __name__ == '__main__':
         my_logger.info(f"Initializing RealtimeSTT for client {client_id}...")
         recorder = AudioToTextRecorder(**recorder_config)  # 假设每个客户端都有独立的录音器实例
         my_logger.info(f"RealtimeSTT initialized for client {client_id}")
+        my_logger.info(f"RealtimeSTT 初始化完毕，你可以说话啦~")
 
         # 设置日志级别以屏蔽不必要的日志消息
         faster_whisper_logger = logging.getLogger("faster_whisper")

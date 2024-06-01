@@ -391,16 +391,16 @@ def goto_func_page():
                 config_data["zhipu"]["username"] = input_zhipu_username.value
                 config_data["zhipu"]["remove_useless"] = switch_zhipu_remove_useless.value
             
-                # config_data["openai"]["api"] = input_openai_api.value
-                # config_data["openai"]["api_key"] = common_textarea_handle(textarea_openai_api_key.value)
-                # # logging.info(select_chatgpt_model.value)
-                # config_data["chatgpt"]["model"] = select_chatgpt_model.value
-                # config_data["chatgpt"]["temperature"] = round(float(input_chatgpt_temperature.value), 1)
-                # config_data["chatgpt"]["max_tokens"] = int(input_chatgpt_max_tokens.value)
-                # config_data["chatgpt"]["top_p"] = round(float(input_chatgpt_top_p.value), 1)
-                # config_data["chatgpt"]["presence_penalty"] = round(float(input_chatgpt_presence_penalty.value), 1)
-                # config_data["chatgpt"]["frequency_penalty"] = round(float(input_chatgpt_frequency_penalty.value), 1)
-                # config_data["chatgpt"]["preset"] = input_chatgpt_preset.value
+                config_data["openai"]["api"] = input_openai_api.value
+                config_data["openai"]["api_key"] = common_textarea_handle(textarea_openai_api_key.value)
+                # logging.info(select_chatgpt_model.value)
+                config_data["chatgpt"]["model"] = select_chatgpt_model.value
+                config_data["chatgpt"]["temperature"] = round(float(input_chatgpt_temperature.value), 1)
+                config_data["chatgpt"]["max_tokens"] = int(input_chatgpt_max_tokens.value)
+                config_data["chatgpt"]["top_p"] = round(float(input_chatgpt_top_p.value), 1)
+                config_data["chatgpt"]["presence_penalty"] = round(float(input_chatgpt_presence_penalty.value), 1)
+                config_data["chatgpt"]["frequency_penalty"] = round(float(input_chatgpt_frequency_penalty.value), 1)
+                config_data["chatgpt"]["preset"] = input_chatgpt_preset.value
                 # config_data["chatgpt"]["prompt_template"] = input_chatgpt_prompt_template.value
 
                 # config_data["openai_tts"]["type"] = select_openai_tts_type.value
@@ -408,6 +408,10 @@ def goto_func_page():
                 # config_data["openai_tts"]["model"] = select_openai_tts_model.value
                 # config_data["openai_tts"]["voice"] = select_openai_tts_voice.value
                 # config_data["openai_tts"]["api_key"] = input_openai_tts_api_key.value
+
+                config_data["edge-tts"]["voice"] = select_edge_tts_voice.value
+                config_data["edge-tts"]["rate"] = input_edge_tts_rate.value
+                config_data["edge-tts"]["volume"] = input_edge_tts_volume.value
 
                 config_data["gpt_sovits"]["type"] = select_gpt_sovits_type.value
                 config_data["gpt_sovits"]["gradio_ip_port"] = input_gpt_sovits_gradio_ip_port.value
@@ -586,22 +590,51 @@ def goto_func_page():
     ..............................................................................................................
 
     """
+    # 聊天类型所有配置项
+    chat_type_options = {
+        # 'none': '不启用', 
+        # 'reread': '复读机', 
+        'chatgpt': 'ChatGPT等OpenAI接口', 
+        # 'claude': 'Claude', 
+        # 'claude2': 'Claude2',
+        # 'chatglm': 'ChatGLM',
+        # 'qwen': 'Qwen',
+        # 'chat_with_file': 'chat_with_file',
+        # 'chatterbot': 'Chatterbot',
+        # 'text_generation_webui': 'text_generation_webui',
+        # 'sparkdesk': '讯飞星火',
+        # 'langchain_chatglm': 'langchain_chatglm',
+        # 'langchain_chatchat': 'langchain_chatchat',
+        'zhipu': '智谱AI',
+        # 'bard': 'Bard',
+        # 'yiyan': '文心一言',
+        # 'tongyixingchen': '通义星尘',
+        # 'my_wenxinworkshop': '千帆大模型',
+        # 'gemini': 'Gemini',
+        # 'qanything': 'QAnything',
+        # 'koboldcpp': 'koboldcpp',
+        # 'anythingllm': 'AnythingLLM',
+        # 'tongyi': '通义千问',
+        # 'gpt4free': 'GPT4Free',
+        # 'custom_llm': '自定义LLM',
+    }
+
     # 语音合成所有配置项
     audio_synthesis_type_options = {
         'edge-tts': 'Edge-TTS', 
-        'vits': 'VITS', 
-        'bert_vits2': 'bert_vits2',
-        'vits_fast': 'VITS-Fast', 
-        'elevenlabs': 'elevenlabs',
-        'genshinvoice_top': 'genshinvoice_top',
-        'tts_ai_lab_top': 'tts_ai_lab_top',
-        'bark_gui': 'bark_gui',
-        'vall_e_x': 'VALL-E-X',
-        'openai_tts': 'OpenAI TTS',
-        'reecho_ai': '睿声AI',
-        'gradio_tts': 'Gradio',
+        # 'vits': 'VITS', 
+        # 'bert_vits2': 'bert_vits2',
+        # 'vits_fast': 'VITS-Fast', 
+        # 'elevenlabs': 'elevenlabs',
+        # 'genshinvoice_top': 'genshinvoice_top',
+        # 'tts_ai_lab_top': 'tts_ai_lab_top',
+        # 'bark_gui': 'bark_gui',
+        # 'vall_e_x': 'VALL-E-X',
+        # 'openai_tts': 'OpenAI TTS',
+        # 'reecho_ai': '睿声AI',
+        # 'gradio_tts': 'Gradio',
         'gpt_sovits': 'GPT_SoVITS',
-        'clone_voice': 'clone-voice'
+        #'clone_voice': 'clone-voice'
     }
 
     with ui.tabs().classes('w-full') as tabs:
@@ -621,6 +654,13 @@ def goto_func_page():
                     }, 
                     value=config.get("run_py")
                 ).style("width:200px;")
+
+                select_chat_type = ui.select(
+                    label='聊天类型', 
+                    options=chat_type_options, 
+                    value=config.get("chat_type")
+                ).style("width:200px;").tooltip('选用的LLM类型。相关的弹幕信息等会传递给此LLM进行推理，获取回答')
+
                 select_audio_synthesis_type = ui.select(
                     label='语音合成', 
                     options=audio_synthesis_type_options, 
@@ -648,8 +688,8 @@ def goto_func_page():
                     textarea_recorder_drop_cmd = ui.textarea(label='丢弃记录录音命令', value=textarea_data_change(config.get("recorder", "drop_cmd")), placeholder='丢弃记录录音数据的命令，支持多个，换行进行分隔').style("width:400px;")
                     textarea_recorder_get_mouse_coordinate_cmd = ui.textarea(label='获取鼠标坐标命令', value=textarea_data_change(config.get("recorder", "get_mouse_coordinate_cmd")), placeholder='获取鼠标坐标命令，支持多个，换行进行分隔').style("width:400px;")
 
-            with ui.card().style(card_css):
-                ui.label("智谱AI")
+            with ui.expansion('智谱AI', icon="settings", value=True).classes('w-full'):
+
                 with ui.row():
                     input_zhipu_api_key = ui.input(label='api key', placeholder='具体参考官方文档，申请地址：https://open.bigmodel.cn/usercenter/apikeys', value=config.get("zhipu", "api_key"))
                     input_zhipu_api_key.style("width:200px")
@@ -686,58 +726,80 @@ def goto_func_page():
                     input_zhipu_username.style("width:200px")
                 with ui.row():
                     switch_zhipu_remove_useless = ui.switch('删除无用字符', value=config.get("zhipu", "remove_useless")).style(switch_internal_css)
-        
-                # ui.label("ChatGPT")
-                # with ui.row():
-                #     input_openai_api = ui.input(label='API地址', placeholder='API请求地址，支持代理', value=config.get("openai", "api")).style("width:200px;")
-                #     textarea_openai_api_key = ui.textarea(label='API密钥', placeholder='API KEY，支持代理', value=textarea_data_change(config.get("openai", "api_key"))).style("width:400px;")
-                # with ui.row():
-                #     chatgpt_models = [
-                #         "gpt-3.5-turbo",
-                #         "gpt-3.5-turbo-0301",
-                #         "gpt-3.5-turbo-0613",
-                #         "gpt-3.5-turbo-1106",
-                #         "gpt-3.5-turbo-16k",
-                #         "gpt-3.5-turbo-16k-0613",
-                #         "gpt-3.5-turbo-instruct",
-                #         "gpt-3.5-turbo-instruct-0914",
-                #         "gpt-4",
-                #         "gpt-4-0314",
-                #         "gpt-4-0613",
-                #         "gpt-4-32k",
-                #         "gpt-4-32k-0314",
-                #         "gpt-4-32k-0613",
-                #         "gpt-4-1106-preview",
-                #         "text-embedding-ada-002",
-                #         "text-davinci-003",
-                #         "text-davinci-002",
-                #         "text-curie-001",
-                #         "text-babbage-001",
-                #         "text-ada-001",
-                #         "text-moderation-latest",
-                #         "text-moderation-stable"
-                #     ]
-                #     data_json = {}
-                #     for line in chatgpt_models:
-                #         data_json[line] = line
-                #     select_chatgpt_model = ui.select(
-                #         label='模型', 
-                #         options=data_json, 
-                #         value=config.get("chatgpt", "model")
-                #     )
-                #     input_chatgpt_temperature = ui.input(label='温度', placeholder='控制生成文本的随机性。较高的温度值会使生成的文本更随机和多样化，而较低的温度值会使生成的文本更加确定和一致。', value=config.get("chatgpt", "temperature")).style("width:200px;")
-                #     input_chatgpt_max_tokens = ui.input(label='最大token数', placeholder='限制生成回答的最大长度。', value=config.get("chatgpt", "max_tokens")).style("width:200px;")
-                #     input_chatgpt_top_p = ui.input(label='前p个选择', placeholder='Nucleus采样。这个参数控制模型从累积概率大于一定阈值的令牌中进行采样。较高的值会产生更多的多样性，较低的值会产生更少但更确定的回答。', value=config.get("chatgpt", "top_p")).style("width:200px;")
-                # with ui.row():
-                #     input_chatgpt_presence_penalty = ui.input(label='存在惩罚', placeholder='控制模型生成回答时对给定问题提示的关注程度。较高的存在惩罚值会减少模型对给定提示的重复程度，鼓励模型更自主地生成回答。', value=config.get("chatgpt", "presence_penalty")).style("width:200px;")
-                #     input_chatgpt_frequency_penalty = ui.input(label='频率惩罚', placeholder='控制生成回答时对已经出现过的令牌的惩罚程度。较高的频率惩罚值会减少模型生成已经频繁出现的令牌，以避免重复和过度使用特定词语。', value=config.get("chatgpt", "frequency_penalty")).style("width:200px;")
+            
+            with ui.expansion('ChatGPT | 闻达 | ChatGLM3 | Kimi Chat | Ollama | One-API等OpenAI接口模型', icon="settings", value=True).classes('w-full'):
 
-                #     input_chatgpt_preset = ui.input(label='预设', placeholder='用于指定一组预定义的设置，以便模型更好地适应特定的对话场景。', value=config.get("chatgpt", "preset")).style("width:500px") 
+                with ui.row():
+                    input_openai_api = ui.input(label='API地址', placeholder='API请求地址，支持代理', value=config.get("openai", "api")).style("width:200px;")
+                    textarea_openai_api_key = ui.textarea(label='API密钥', placeholder='API KEY，支持代理', value=textarea_data_change(config.get("openai", "api_key"))).style("width:400px;").tooltip("可以配置多行，但暂时仅支持第一个密钥")
+                with ui.row():
+                    chatgpt_models = [
+                        "gpt-3.5-turbo",
+                        "gpt-3.5-turbo-0301",
+                        "gpt-3.5-turbo-0613",
+                        "gpt-3.5-turbo-1106",
+                        "gpt-3.5-turbo-16k",
+                        "gpt-3.5-turbo-16k-0613",
+                        "gpt-3.5-turbo-instruct",
+                        "gpt-3.5-turbo-instruct-0914",
+                        "gpt-4",
+                        "gpt-4-0314",
+                        "gpt-4-0613",
+                        "gpt-4-32k",
+                        "gpt-4-32k-0314",
+                        "gpt-4-32k-0613",
+                        "gpt-4-1106-preview",
+                        "text-embedding-ada-002",
+                        "text-davinci-003",
+                        "text-davinci-002",
+                        "text-curie-001",
+                        "text-babbage-001",
+                        "text-ada-001",
+                        "text-moderation-latest",
+                        "text-moderation-stable"
+                    ]
+                    data_json = {}
+                    for line in chatgpt_models:
+                        data_json[line] = line
+                    select_chatgpt_model = ui.select(
+                        label='模型', 
+                        options=data_json, 
+                        value=config.get("chatgpt", "model")
+                    )
+                    input_chatgpt_temperature = ui.input(label='温度', placeholder='控制生成文本的随机性。较高的温度值会使生成的文本更随机和多样化，而较低的温度值会使生成的文本更加确定和一致。', value=config.get("chatgpt", "temperature")).style("width:200px;")
+                    input_chatgpt_max_tokens = ui.input(label='最大token数', placeholder='限制生成回答的最大长度。', value=config.get("chatgpt", "max_tokens")).style("width:200px;")
+                    input_chatgpt_top_p = ui.input(label='前p个选择', placeholder='Nucleus采样。这个参数控制模型从累积概率大于一定阈值的令牌中进行采样。较高的值会产生更多的多样性，较低的值会产生更少但更确定的回答。', value=config.get("chatgpt", "top_p")).style("width:200px;")
+                with ui.row():
+                    input_chatgpt_presence_penalty = ui.input(label='存在惩罚', placeholder='控制模型生成回答时对给定问题提示的关注程度。较高的存在惩罚值会减少模型对给定提示的重复程度，鼓励模型更自主地生成回答。', value=config.get("chatgpt", "presence_penalty")).style("width:200px;")
+                    input_chatgpt_frequency_penalty = ui.input(label='频率惩罚', placeholder='控制生成回答时对已经出现过的令牌的惩罚程度。较高的频率惩罚值会减少模型生成已经频繁出现的令牌，以避免重复和过度使用特定词语。', value=config.get("chatgpt", "frequency_penalty")).style("width:200px;")
+
+                    input_chatgpt_preset = ui.input(label='预设', placeholder='用于指定一组预定义的设置，以便模型更好地适应特定的对话场景。', value=config.get("chatgpt", "preset")).style("width:500px") 
                 # with ui.row():
                 #     input_chatgpt_prompt_template = ui.input(label='提示词模板', placeholder='提示词模板，在每次提问时会使用此模板包装数据，{}内是变量数据，请勿随意删除', value=config.get("chatgpt", "prompt_template")).style("width:1000px") 
-    
-            with ui.card().style(card_css):
-                ui.label("GPT-SoVITS")
+
+            with ui.expansion('Edge-TTS', icon="settings", value=True).classes('w-full'):
+
+                with ui.row():
+                    with open('data/edge-tts-voice-list.txt', 'r') as file:
+                        file_content = file.read()
+                    # 按行分割内容，并去除每行末尾的换行符
+                    lines = file_content.strip().split('\n')
+                    data_json = {}
+                    for line in lines:
+                        data_json[line] = line
+                    select_edge_tts_voice = ui.select(
+                        label='说话人', 
+                        options=data_json, 
+                        value=config.get("edge-tts", "voice")
+                    )
+
+                    input_edge_tts_rate = ui.input(label='语速增益', placeholder='语速增益 默认是 +0%，可以增减，注意 + - %符合别搞没了，不然会影响语音合成', value=config.get("edge-tts", "rate")).style("width:200px;")
+
+                    input_edge_tts_volume = ui.input(label='音量增益', placeholder='音量增益 默认是 +0%，可以增减，注意 + - %符合别搞没了，不然会影响语音合成', value=config.get("edge-tts", "volume")).style("width:200px;")
+        
+        
+            with ui.expansion('GPT-SoVITS', icon="settings", value=True).classes('w-full'):
+
                 with ui.row():
                     select_gpt_sovits_type = ui.select(
                         label='API类型', 

@@ -207,7 +207,7 @@ function start_msg() {
     else if (!server_available)
         displayRealtimeText("🖥️  请运行服务端  🖥️", displayDiv);
     else
-        displayRealtimeText("👄  请开始说话  👄", displayDiv);
+        displayRealtimeText("👄  请等待后端加载完毕后再说话喵  👄", displayDiv);
 };
 
 // Check server availability periodically 自动连接socket
