@@ -68,6 +68,8 @@ To use RealtimeSTT with GPU support via CUDA please follow these steps:
 Win如果装不上webrtcvad，提示了VS C++相关的报错，请下载[https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/](https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/)，安装C++开发相关工具，然后重新安装依赖。
 
 ## 更新日志
+- 2024-06-03
+  - 增加了 唤醒词的配置，未启用唤醒词功能，测试了下可以通过唤醒词触发录音。唤醒一次，说一些话。
 
 - 2024-06-02
   - 新增了OpenAI接口的接入，测了ollama，没啥问题

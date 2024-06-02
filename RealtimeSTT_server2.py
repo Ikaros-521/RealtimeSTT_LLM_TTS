@@ -725,6 +725,15 @@ if __name__ == '__main__':
             # 'on_realtime_transcription_stabilized': text_detected,
             # 音频在正式录制之前缓冲的时间跨度（以秒为单位）。这有助于抵消语音活动检测中固有的延迟，确保不会遗漏任何初始音频
             'pre_recording_buffer_duration': 0.2,
+            
+            # 用于启动录制的唤醒词。可以以逗号分隔的字符串形式提供多个唤醒词。支持的唤醒词有：alexa、americano、blueberry、bumblebee、computer、grapefruits、grasshopper、hey google、hey siri、jarvis、ok google、picovoice、porcupine、terminator
+            # 'wake_words': 'ok google',
+            # 唤醒词检测的灵敏度级别（0 表示最不敏感，1 表示最敏感）
+            # 'wake_words_sensitivity': 0.6,
+            # 默认值=0 如果最初未检测到语音，则在系统切换到唤醒词激活之前，监控开始后的持续时间（以秒为单位）。如果设置为零，系统将立即使用唤醒词激活
+            # 'wake_word_activation_delay': 0,
+            # 默认值=5 识别唤醒词后的持续时间（以秒为单位）。如果在此窗口中未检测到后续语音活动，系统将转换回非活动状态，等待下一个唤醒词或语音激活。
+            # 'wake_word_timeout': 5,
         }
 
         Configure_logger(file_path)
