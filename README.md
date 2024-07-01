@@ -67,7 +67,19 @@ To use RealtimeSTT with GPU support via CUDA please follow these steps:
 
 Win如果装不上webrtcvad，提示了VS C++相关的报错，请下载[https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/](https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/)，安装C++开发相关工具，然后重新安装依赖。
 
+## 使用说明
+
+启动后端 `python RealtimeSTT_server2.py`  
+
+双击`index.html`，浏览器运行，填入服务器IP地址，注意，关闭服务器的防火墙，或者针对性放行9001/9002 这两个用于websocket连接的端口！
+
+等待后端模型加载完毕后，就可以正常对话了。  
+
 ## 更新日志
+- 2024-07-01
+  - 修复webui，聊天类型无法保存的bug
+  - 给webui的OpenAI的模型增加自定义配置功能，可以删除后，自定义完回车保存配置
+
 - 2024-06-03
   - 增加了 唤醒词的配置，未启用唤醒词功能，测试了下可以通过唤醒词触发录音。唤醒一次，说一些话。
 
