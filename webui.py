@@ -369,6 +369,7 @@ def goto_func_page():
             """
             if True:
                 config_data["run_py"] = select_run_py.value
+                config_data["chat_type"] = select_chat_type.value
                 config_data["audio_synthesis_type"] = select_audio_synthesis_type.value
 
                 config_data["recorder"]["device_index"] = input_recorder_device_index.value
@@ -767,7 +768,10 @@ def goto_func_page():
                     select_chatgpt_model = ui.select(
                         label='模型', 
                         options=data_json, 
-                        value=config.get("chatgpt", "model")
+                        value=config.get("chatgpt", "model"),
+                        with_input=True,
+                        new_value_mode='add-unique',
+                        clearable=True
                     )
                     input_chatgpt_temperature = ui.input(label='温度', placeholder='控制生成文本的随机性。较高的温度值会使生成的文本更随机和多样化，而较低的温度值会使生成的文本更加确定和一致。', value=config.get("chatgpt", "temperature")).style("width:200px;")
                     input_chatgpt_max_tokens = ui.input(label='最大token数', placeholder='限制生成回答的最大长度。', value=config.get("chatgpt", "max_tokens")).style("width:200px;")
