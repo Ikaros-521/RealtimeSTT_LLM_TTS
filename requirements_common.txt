@@ -1,0 +1,199 @@
+aiofiles==23.2.1
+aiohttp==3.9.3
+aiosignal==1.3.1
+altair==5.2.0
+annotated-types==0.6.0
+anthropic==0.2.10
+antlr4-python3-runtime==4.9.3
+anyio==4.3.0
+async-timeout==4.0.3
+attrs==23.2.0
+av==10.0.0
+azure-cognitiveservices-speech==1.35.0
+beautifulsoup4==4.12.3
+bidict==0.23.1
+boltons @ file:///C:/b/abs_707eo7c09t/croot/boltons_1677628723117/work
+brotlipy==0.7.0
+cachetools==5.3.2
+certifi==2024.2.2
+cffi @ file:///C:/b/abs_49n3v2hyhr/croot/cffi_1670423218144/work
+charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
+click==8.1.7
+colorama @ file:///C:/b/abs_a9ozq0l032/croot/colorama_1672387194846/work
+colored==2.2.4
+coloredlogs==15.0.1
+colorlog==6.8.2
+conda==23.3.1
+conda-content-trust @ file:///C:/Windows/TEMP/abs_4589313d-fc62-4ccc-81c0-b801b4449e833j1ajrwu/croots/recipe/conda-content-trust_1658126379362/work
+conda-package-handling @ file:///C:/b/abs_fcga8w0uem/croot/conda-package-handling_1672865024290/work
+conda_package_streaming @ file:///C:/b/abs_0e5n5hdal3/croot/conda-package-streaming_1670508162902/work
+contourpy==1.2.0
+cryptography @ file:///C:/b/abs_8ecplyc3n2/croot/cryptography_1677533105000/work
+ctranslate2==3.24.0
+cuda-python==12.3.0
+cycler==0.12.1
+dataclasses-json==0.5.14
+Deprecated==1.2.14
+diffusers==0.24.0
+distro==1.9.0
+edge-tts==6.1.15
+enum34==1.1.10
+exceptiongroup==1.2.0
+fastapi==0.100.1
+fastapi-socketio==0.0.10
+faster-whisper==0.10.0
+ffmpy==0.3.2
+filelock==3.9.0
+fire==0.5.0
+flatbuffers==23.5.26
+fonttools==4.49.0
+frozenlist==1.4.1
+fsspec==2023.12.2
+gradio_client==0.10.1
+greenlet==3.0.3
+h11==0.14.0
+halo==0.0.31
+httpcore==1.0.3
+httptools==0.6.1
+httpx==0.26.0
+huggingface-hub==0.20.1
+humanfriendly==10.0
+idna @ file:///C:/b/abs_bdhbebrioa/croot/idna_1666125572046/work
+ifaddr==0.2.0
+importlib-metadata==6.11.0
+importlib-resources==6.1.1
+itsdangerous==2.1.2
+janus==1.0.0
+Jinja2==3.1.3
+joblib==1.3.2
+jsonpatch @ file:///tmp/build/80754af9/jsonpatch_1615747632069/work
+jsonpointer==2.1
+jsonschema==4.21.1
+jsonschema-specifications==2023.12.1
+keyboard==0.13.5
+kiwisolver==1.4.5
+langchain==0.0.198
+langchainplus-sdk==0.0.20
+langid==1.1.6
+legacy==0.1.7
+log-symbols==0.0.14
+markdown-it-py==3.0.0
+markdown2==2.4.10
+MarkupSafe==2.1.2
+marshmallow==3.20.2
+matplotlib==3.8.3
+mdurl==0.1.2
+menuinst @ file:///C:/Users/BUILDE~1/AppData/Local/Temp/abs_455sf5o0ct/croots/recipe/menuinst_1661805970842/work
+miniaudio==1.59
+MouseInfo==0.1.3
+mpmath==1.3.0
+multidict==6.0.5
+mypy-extensions==1.0.0
+networkx==3.0
+nicegui==1.4.5
+nltk==3.8.1
+ntplib==0.4.0
+numexpr==2.9.0
+numpy==1.24.1
+nvidia-cublas-cu12==12.3.4.1
+nvidia-cuda-nvrtc-cu12==12.3.103
+nvidia-cudnn-cu12==8.9.4.25
+omegaconf==2.3.0
+onnx==1.15.0
+onnxruntime==1.16.3
+openai==0.27.10
+openapi-schema-pydantic==1.2.4
+opentelemetry-api==1.23.0
+opentelemetry-sdk==1.23.0
+opentelemetry-semantic-conventions==0.44b0
+orjson==3.9.14
+packaging @ file:///C:/b/abs_ed_kb9w6g4/croot/packaging_1678965418855/work
+pandas==2.2.0
+Pillow==9.3.0
+pluggy @ file:///C:/ci/pluggy_1648042746254/work
+protobuf==3.20.2
+pscript==0.7.7
+pvporcupine==1.9.5
+pyarmor==8.4.7
+pyarmor.cli.core==5.4.3
+PyAudio==0.2.14
+PyAutoGUI==0.9.54
+pycosat @ file:///C:/b/abs_4b1rrw8pn9/croot/pycosat_1666807711599/work
+pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+pydantic==2.6.2
+pydantic_core==2.16.3
+pydub==0.25.1
+pygame==2.5.2
+PyGetWindow==0.0.9
+Pygments==2.17.2
+PyJWT==2.8.0
+PyMsgBox==1.0.9
+pyOpenSSL @ file:///C:/b/abs_552w85x1jz/croot/pyopenssl_1677607703691/work
+pyparsing==3.1.1
+pyperclip==1.8.2
+pyreadline3==3.4.1
+PyRect==0.2.0
+PyScreeze==0.1.30
+PySocks @ file:///C:/ci_310/pysocks_1642089375450/work
+python-dateutil==2.8.2
+python-dotenv==1.0.1
+python-engineio==4.9.0
+python-multipart==0.0.6
+python-socketio==5.11.1
+pytweening==1.2.0
+pytz==2024.1
+pywin32==306
+PyYAML==6.0.1
+referencing==0.33.0
+regex==2023.12.25
+requests==2.31.0
+rich==13.7.0
+rpds-py==0.18.0
+ruamel.yaml @ file:///C:/b/abs_30ee5qbthd/croot/ruamel.yaml_1666304562000/work
+ruamel.yaml.clib @ file:///C:/b/abs_aarblxbilo/croot/ruamel.yaml.clib_1666302270884/work
+ruff==0.2.2
+safetensors==0.4.1
+schedule==1.2.1
+scipy==1.12.0
+semantic-version==2.10.0
+shellingham==1.5.4
+simple-websocket==1.0.0
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+sniffio==1.3.0
+sounddevice==0.4.6
+soupsieve==2.5
+SpeechRecognition==3.10.1
+spinners==0.0.24
+SQLAlchemy==2.0.27
+starlette==0.27.0
+streamdiffusion @ git+https://github.com/cumulo-autumn/StreamDiffusion.git@62596fd39b86a3088e28b2f2c58caa36bc069c50
+sympy==1.12
+tenacity==8.2.3
+termcolor==2.4.0
+tokenizers==0.15.0
+tomlkit==0.12.0
+toolz @ file:///C:/b/abs_cfvk6rc40d/croot/toolz_1667464080130/work
+torch==2.1.2+cu118
+torchaudio==2.1.2+cu118
+tqdm @ file:///C:/b/abs_f76j9hg7pv/croot/tqdm_1679561871187/work
+transformers==4.36.2
+typer==0.9.0
+typing-inspect==0.9.0
+typing_extensions==4.9.0
+tzdata==2024.1
+urllib3 @ file:///C:/b/abs_3ce53vrdcr/croot/urllib3_1680254693505/work
+uvicorn==0.22.0
+vbuild==0.8.2
+vocode==0.1.111
+watchfiles==0.21.0
+webrtcvad==2.0.10
+websockets==11.0.3
+win-inet-pton @ file:///C:/ci_310/win_inet_pton_1642658466512/work
+wincertstore==0.2
+wrapt==1.16.0
+wsproto==1.2.0
+xformers==0.0.22.post7
+yarl==1.9.4
+zhipuai==2.0.1
+zipp==3.17.0
+zstandard==0.19.0
