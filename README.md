@@ -1,5 +1,9 @@
 # 中文说明
 
+## 整合包（内置conda环境）
+
+Win整合包：[https://pan.baidu.com/s/1EvqEBIUXBEYqYY0rWMsgAA?pwd=2m8y](https://pan.baidu.com/s/1EvqEBIUXBEYqYY0rWMsgAA?pwd=2m8y)  
+
 ## 安装
 
 ### GPU Support with CUDA (recommended)
