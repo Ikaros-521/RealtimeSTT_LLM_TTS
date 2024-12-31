@@ -72,6 +72,8 @@ Win如果装不上webrtcvad，提示了VS C++相关的报错，请下载[https:/
 ### WebUI
 
 `python webui.py`，启动后根据使用情况进行配置，然后运行即可。  
+![image](https://github.com/user-attachments/assets/c6dc0430-66a6-444f-9d24-360c8ccbee3f)
+
 
 ### 直接启动后端服务
 
@@ -80,6 +82,9 @@ Win如果装不上webrtcvad，提示了VS C++相关的报错，请下载[https:/
 双击`index.html`，浏览器运行，填入服务器IP地址，注意，关闭服务器的防火墙，或者针对性放行9001/9002 这两个用于websocket连接的端口！
 
 等待后端模型加载完毕后，就可以正常对话了。  
+
+![image](https://github.com/user-attachments/assets/93509d4d-c60b-4c38-9284-583ba667e437)
+
 
 ## 更新日志
 
