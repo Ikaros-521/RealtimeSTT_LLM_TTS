@@ -162,3 +162,8 @@ pkg
 audiopen2.py
 realtime_stt_llm_tts2.py
 
+vocode_test.py
+*.log
+
+llm_stream.py
+hf_download/
