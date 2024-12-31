@@ -69,6 +69,12 @@ Win如果装不上webrtcvad，提示了VS C++相关的报错，请下载[https:/
 
 ## 使用说明
 
+### WebUI
+
+`python webui.py`，启动后根据使用情况进行配置，然后运行即可。  
+
+### 直接启动后端服务
+
 启动后端 `python RealtimeSTT_server2.py`  
 
 双击`index.html`，浏览器运行，填入服务器IP地址，注意，关闭服务器的防火墙，或者针对性放行9001/9002 这两个用于websocket连接的端口！
